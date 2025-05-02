@@ -4,12 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace meal_menu_api.Context
 {
-    public class DataContext : IdentityDbContext<AppUser>
+    public class DataContext(DbContextOptions<DataContext> options) : IdentityDbContext<AppUser>(options)
     {
-        public DataContext(DbContextOptions<DataContext> options) : base(options) 
-        { 
-            
-        
-        }
+
     }
 }

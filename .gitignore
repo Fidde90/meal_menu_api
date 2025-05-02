@@ -43,3 +43,5 @@ node_modules/
 
 # Windows system files
 desktop.ini
+/appsettings.json
+/appsettings.json

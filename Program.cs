@@ -26,10 +26,21 @@ namespace meal_menu_api
                 x.User.RequireUniqueEmail = true;
             }).AddEntityFrameworkStores<DbContext>();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("Meal_menu_client", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline
 
+            app.UseCors("Meal_menu_client");
             app.UseSwagger();
             app.UseSwaggerUI();
             app.UseHttpsRedirection();
