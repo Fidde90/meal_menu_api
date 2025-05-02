@@ -1,0 +1,45 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+# .NET
+bin/
+obj/
+
+# ASP.NET
+wwwroot/
+appsettings.Development.json
+
+# User-specific files
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# Visual Studio files
+.vs/
+
+# Windows Installer files
+Thumbs.db
+ehthumbs.db
+
+# Logs
+*.log
+
+# VS Code settings (if you use VS Code in some parts)
+.vscode/
+
+# .NET Core specific files
+project.lock.json
+project.fragment.lock.json
+
+# Npm-related files for Vue.js (if applicable)
+node_modules/
+
+# MacOS system files
+.DS_Store
+
+# Windows system files
+desktop.ini
