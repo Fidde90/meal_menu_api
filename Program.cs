@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using meal_menu_api.Config;
 using System.Text.Json.Serialization;
 using meal_menu_api.Filters;
+using meal_menu_api.Context;
+using Microsoft.Extensions.Options;
 
 namespace meal_menu_api
 {
@@ -17,21 +19,25 @@ namespace meal_menu_api
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddDbContext<DbContext>(options => options.UseSqlServer(connectionString));
+            builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
             builder.Services.RegisterRepositories(builder.Configuration);
             builder.Services.RegisterServices(builder.Configuration);
             builder.Services.RegisterJwt(builder.Configuration);
 
-            builder.Services.AddControllers(options =>
-            {
 
+            builder.Services.AddControllers(options =>
+            {  options.Filters.Add<UseApiKeyAttribute>();  // Lägg till API-nyckelfiltrering globalt
             }).AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; });
 
             builder.Services.AddDefaultIdentity<AppUser>(x => {
                 x.SignIn.RequireConfirmedAccount = false;
                 x.Password.RequiredLength = 3;
                 x.User.RequireUniqueEmail = true;
-            }).AddEntityFrameworkStores<DbContext>();
+                x.Password.RequireDigit = false;
+                x.Password.RequireNonAlphanumeric = false;
+                x.Password.RequireUppercase = false;
+                x.Password.RequireLowercase = false;
+            }).AddEntityFrameworkStores<DataContext>();
 
             builder.Services.AddCors(options =>
             {

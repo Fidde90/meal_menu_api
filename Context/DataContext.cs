@@ -7,5 +7,10 @@ namespace meal_menu_api.Context
     public class DataContext(DbContextOptions<DataContext> options) : IdentityDbContext<AppUser>(options)
     {
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+        }
     }
 }
