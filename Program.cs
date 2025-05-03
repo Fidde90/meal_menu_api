@@ -1,7 +1,8 @@
-
 using meal_menu_api.Entities;
 using Microsoft.EntityFrameworkCore;
+using meal_menu_api.Config;
 using System.Text.Json.Serialization;
+using meal_menu_api.Filters;
 
 namespace meal_menu_api
 {
@@ -14,11 +15,17 @@ namespace meal_menu_api
 
             // Add services to the container.
             builder.Services.AddControllers();
-            builder.Services.AddOpenApi();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddControllers().AddJsonOptions(options =>{options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;});
             builder.Services.AddDbContext<DbContext>(options => options.UseSqlServer(connectionString));
+            builder.Services.RegisterRepositories(builder.Configuration);
+            builder.Services.RegisterServices(builder.Configuration);
+            builder.Services.RegisterJwt(builder.Configuration);
+
+            builder.Services.AddControllers(options =>
+            {
+
+            }).AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; });
 
             builder.Services.AddDefaultIdentity<AppUser>(x => {
                 x.SignIn.RequireConfirmedAccount = false;
@@ -39,11 +46,13 @@ namespace meal_menu_api
             var app = builder.Build();
 
             // Configure the HTTP request pipeline
-
+      
             app.UseCors("Meal_menu_client");
             app.UseSwagger();
+            app.UseSwaggerUI(x => x.SwaggerEndpoint("/swagger/v1/swagger.json", "Meal menu v1"));
             app.UseSwaggerUI();
             app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
             app.Run();
