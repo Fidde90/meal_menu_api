@@ -96,21 +96,47 @@ namespace meal_menu_api.Controllers
             return BadRequest();
         }
 
-
-        [HttpDelete]
-        [Route("delete")]
+        [HttpPost]
+        [Route("change-password")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> DeleteUser()
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
         {
             var user = await _userManager.GetUserAsync(User);
 
-            if (user != null)
-            {
-                var deleted = await _userManager.DeleteAsync(user);
-                if (deleted.Succeeded)
-                    return NoContent();
-            }
-            return NotFound(new {message = "user not found" });
+            if (user == null)
+                return NotFound(new { message = "user not found" });
+
+            if (!await _userManager.CheckPasswordAsync(user, changePasswordDto.Password))
+                return Unauthorized();
+
+            var passwordChanged = await _userManager.ChangePasswordAsync(user, changePasswordDto.Password, changePasswordDto.NewPassword);
+
+            if (passwordChanged.Succeeded)
+                return Ok();
+
+            return BadRequest(new { message = "Failed to delete user" });
+        }
+
+        [HttpPost("delete")]
+        [Route("delete")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> DeleteAccount(DeleteAccountDto deleteAccountdto)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+                return NotFound(new { message = "user not found" });
+
+            if (!await _userManager.CheckPasswordAsync(user, deleteAccountdto.Password))
+                return Unauthorized();
+
+            var deleted = await _userManager.DeleteAsync(user);
+
+            if (deleted.Succeeded)
+                return NoContent();
+
+            return BadRequest(new { message = "Failed to delete user" });
+
         }
     }
 }

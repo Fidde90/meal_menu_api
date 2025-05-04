@@ -1,0 +1,17 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace meal_menu_api.Dtos
+{
+    public class ChangePasswordDto
+    {
+        [DataType(DataType.Password)]
+        [Required(ErrorMessage = "Password is required!")]
+        [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_]).{8,}$", ErrorMessage = "Invalid password!")]
+        public string Password { get; set; } = null!;
+
+        [DataType(DataType.Password)]
+        [Required(ErrorMessage = "Password is required!")]
+        [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_]).{8,}$", ErrorMessage = "Invalid password!")]
+        public string NewPassword { get; set; } = null!;
+    }
+}
