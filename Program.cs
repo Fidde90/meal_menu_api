@@ -4,7 +4,7 @@ using meal_menu_api.Config;
 using System.Text.Json.Serialization;
 using meal_menu_api.Filters;
 using meal_menu_api.Context;
-using Microsoft.Extensions.Options;
+
 
 namespace meal_menu_api
 {
@@ -23,11 +23,8 @@ namespace meal_menu_api
             builder.Services.RegisterRepositories(builder.Configuration);
             builder.Services.RegisterServices(builder.Configuration);
             builder.Services.RegisterJwt(builder.Configuration);
-
-
-            builder.Services.AddControllers(options =>
-            {  options.Filters.Add<UseApiKeyAttribute>();  // Lägg till API-nyckelfiltrering globalt
-            }).AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; });
+            builder.Services.AddControllers(options => { options.Filters.Add<UseApiKeyAttribute>();})
+                .AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; });
 
             builder.Services.AddDefaultIdentity<AppUser>(x => {
                 x.SignIn.RequireConfirmedAccount = false;

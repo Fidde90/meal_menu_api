@@ -19,7 +19,7 @@ namespace meal_menu_api.Config
                         ValidateAudience = true,
                         ValidAudience = configuration["Jwt:Audience"],
 
-                        ValidateLifetime = true,
+                        ValidateLifetime = false,
 
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!)),

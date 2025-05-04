@@ -17,10 +17,12 @@ namespace meal_menu_api.Dtos
         [Required(ErrorMessage = "Email is required!")]
         public string Email { get; set; } = null!;
 
+        [DataType(DataType.Password)]
         [Required(ErrorMessage = "Password is required!")]
-        //[RegularExpression("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", ErrorMessage = "Invalid password!")]
+        [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_]).{8,}$", ErrorMessage = "Invalid password!")]
         public string Password { get; set; } = null!;
 
+        [DataType(DataType.Password)]
         [Required(ErrorMessage = "Required!")]
         [Compare(nameof(Password), ErrorMessage = "Passwords did not match!")]
         public string ConfirmPassword { get; set; } = null!;
