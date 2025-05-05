@@ -12,6 +12,5 @@ namespace meal_menu_api.Context
 
             return new DataContext(optionsBuilder.Options);
         }
-
     }
 }

@@ -11,6 +11,10 @@ namespace meal_menu_api.Entities
         [Required]
         public string ImageUrl { get; set; } = null!;
 
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
+
         [ForeignKey(nameof(Recipe))]
         public int RecipeId { get; set; }
         public RecipeEntity Recipe { get; set; } = null!;

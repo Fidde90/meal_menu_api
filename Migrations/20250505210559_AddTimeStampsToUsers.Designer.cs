@@ -12,8 +12,8 @@ using meal_menu_api.Context;
 namespace meal_menu_api.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250505080727_added lastlogin, updated-at on user model")]
-    partial class addedlastloginupdatedatonusermodel
+    [Migration("20250505210559_AddTimeStampsToUsers")]
+    partial class AddTimeStampsToUsers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -169,6 +169,9 @@ namespace meal_menu_api.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)

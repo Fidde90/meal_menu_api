@@ -14,6 +14,10 @@ namespace meal_menu_api.Entities
 
         public int Amount { get; set; }
 
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
+
         [ForeignKey(nameof(Unit))]
         public int UnitId { get; set; }
         public UnitEntity Unit { get; set; } = null!;

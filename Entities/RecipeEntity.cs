@@ -17,6 +17,10 @@ namespace meal_menu_api.Entities
 
         public int Ppl {  get; set; }
 
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
+
         public List<ImageEntity> Images { get; set; } = new List<ImageEntity>();
 
         public List<IngredientEntity> Ingredients { get; set; } = new List<IngredientEntity>();

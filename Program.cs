@@ -4,6 +4,7 @@ using meal_menu_api.Config;
 using System.Text.Json.Serialization;
 using meal_menu_api.Filters;
 using meal_menu_api.Context;
+using meal_menu_api.Seeders;
 
 
 namespace meal_menu_api
@@ -48,8 +49,14 @@ namespace meal_menu_api
 
             var app = builder.Build();
 
+            using (var scope = app.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+                DbSeeder.SeedUnits(context);
+            }
+
             // Configure the HTTP request pipeline
-      
+
             app.UseCors("Meal_menu_client");
             app.UseSwagger();
             app.UseSwaggerUI(x => x.SwaggerEndpoint("/swagger/v1/swagger.json", "Meal menu v1"));
