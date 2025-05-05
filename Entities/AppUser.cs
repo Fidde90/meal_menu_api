@@ -8,5 +8,8 @@ namespace meal_menu_api.Entities
 
         public string LastName { get; set; } = null!;
 
+        public DateTime UpdatedAt { get; set; }
+
+        public DateTime LastLogin { get; set; }
     }
 }

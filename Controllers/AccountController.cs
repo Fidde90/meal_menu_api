@@ -42,7 +42,8 @@ namespace meal_menu_api.Controllers
                     LastName = registerDto.LastName,
                     Email = registerDto.Email,
                     UserName = registerDto.Email,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    UpdatedAt = DateTime.UtcNow,
                 };
 
                 var createUser = await _userManager.CreateAsync(newUser, registerDto.Password);
@@ -79,19 +80,20 @@ namespace meal_menu_api.Controllers
                 {
                     var userDto = new UserDto
                     {
-                        FirstName = existingUser.FirstName ?? null,
-                        LastName = existingUser.LastName ?? null,
-                        Email = existingUser.Email ?? null,
-                        UserName = existingUser.UserName ?? null,
-                        PhoneNumber = existingUser.PhoneNumber ?? null,
-                        EmailConfirmed = existingUser.EmailConfirmed,
+                        FirstName        = existingUser.FirstName!,
+                        LastName         = existingUser.LastName!,
+                        Email            = existingUser.Email!,
+                        UserName         = existingUser.UserName!,
+                        PhoneNumber      = existingUser.PhoneNumber ?? null,
+                        EmailConfirmed   = existingUser.EmailConfirmed,
                         TowFactorEnabeld = existingUser.TwoFactorEnabled,
-                        LastLogin = DateTime.UtcNow
+                        LastLogin        = DateTime.UtcNow
                     };
 
+                    existingUser.LastLogin = DateTime.UtcNow;
+                    await _userManager.UpdateAsync(existingUser);
                     return Ok(new { User = userDto, Token = jwtToken });
                 }
-
             }
             return BadRequest();
         }
@@ -101,6 +103,9 @@ namespace meal_menu_api.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(new { user = changePasswordDto, message = "invalid input!" });
+
             var user = await _userManager.GetUserAsync(User);
 
             if (user == null)
@@ -109,6 +114,7 @@ namespace meal_menu_api.Controllers
             if (!await _userManager.CheckPasswordAsync(user, changePasswordDto.Password))
                 return Unauthorized();
 
+            user.UpdatedAt = DateTime.UtcNow;
             var passwordChanged = await _userManager.ChangePasswordAsync(user, changePasswordDto.Password, changePasswordDto.NewPassword);
 
             if (passwordChanged.Succeeded)
@@ -122,6 +128,9 @@ namespace meal_menu_api.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> DeleteAccount(DeleteAccountDto deleteAccountdto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(new { user = deleteAccountdto, message = "invalid input!" });
+
             var user = await _userManager.GetUserAsync(User);
 
             if (user == null)
