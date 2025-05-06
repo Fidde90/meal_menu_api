@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using meal_menu_api.Config;
 using System.Text.Json.Serialization;
 using meal_menu_api.Filters;
-using meal_menu_api.Context;
-using meal_menu_api.Seeders;
+using meal_menu_api.Database.Seeders;
+using meal_menu_api.Database.Context;
 
 
 namespace meal_menu_api

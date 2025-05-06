@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using meal_menu_api.Context;
+using meal_menu_api.Database.Context;
 
 #nullable disable
 
@@ -326,7 +326,13 @@ namespace meal_menu_api.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Recipes");
                 });
@@ -463,6 +469,17 @@ namespace meal_menu_api.Migrations
                     b.Navigation("Unit");
                 });
 
+            modelBuilder.Entity("meal_menu_api.Entities.RecipeEntity", b =>
+                {
+                    b.HasOne("meal_menu_api.Entities.AppUser", "User")
+                        .WithMany("Recipes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("meal_menu_api.Entities.StepEntity", b =>
                 {
                     b.HasOne("meal_menu_api.Entities.RecipeEntity", "Recipe")
@@ -472,6 +489,11 @@ namespace meal_menu_api.Migrations
                         .IsRequired();
 
                     b.Navigation("Recipe");
+                });
+
+            modelBuilder.Entity("meal_menu_api.Entities.AppUser", b =>
+                {
+                    b.Navigation("Recipes");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.RecipeEntity", b =>

@@ -8,6 +8,11 @@ namespace meal_menu_api.Entities
         [Key]
         public int Id { get; set; }
 
+        [ForeignKey(nameof(Recipe))]
+        public int RecipeId { get; set; }
+
+        public RecipeEntity Recipe { get; set; } = null!;
+
         [Required]
         [MinLength(2)]
         public string Description { get; set; } = null!;
@@ -15,10 +20,5 @@ namespace meal_menu_api.Entities
         public DateTime CreatedAt { get; set; }
 
         public DateTime UpdatedAt { get; set; }
-
-        [ForeignKey(nameof(Recipe))]
-        public int RecipeId { get; set; }
-
-        public RecipeEntity Recipe { get; set; } = null!;
     }
 }

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace meal_menu_api.Context
+namespace meal_menu_api.Database.Context
 {
     public class DataContext(DbContextOptions<DataContext> options) : IdentityDbContext<AppUser>(options)
     {
@@ -20,6 +20,13 @@ namespace meal_menu_api.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Recipes -> Users
+            modelBuilder.Entity<RecipeEntity>()
+                .HasOne(r => r.User)
+                .WithMany(u => u.Recipes)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Recipe -> Ingredients
             modelBuilder.Entity<IngredientEntity>()

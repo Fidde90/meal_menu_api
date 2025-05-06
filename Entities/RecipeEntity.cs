@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace meal_menu_api.Entities
 {
@@ -6,6 +7,11 @@ namespace meal_menu_api.Entities
     {
         [Key]
         public int Id { get; set; }
+
+        [ForeignKey(nameof(User))]
+        public string UserId { get; set; } = null!;
+
+        public AppUser User { get; set; } = null!;
 
         [Required]
         [MinLength(2)]

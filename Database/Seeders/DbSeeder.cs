@@ -1,7 +1,7 @@
-﻿using meal_menu_api.Context;
+﻿using meal_menu_api.Database.Context;
 using meal_menu_api.Entities;
 
-namespace meal_menu_api.Seeders
+namespace meal_menu_api.Database.Seeders
 {
     public class DbSeeder
     {
