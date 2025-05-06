@@ -7,7 +7,8 @@ namespace meal_menu_api.Config
     {
         public static void RegisterServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddSingleton<AuthManager>();
+            services.AddScoped<AuthManager>();
+            services.AddScoped<RecipeManager>();
         }
     }
 }

@@ -50,7 +50,7 @@ namespace meal_menu_api.Controllers
             existingUserInfo.PhoneNumber = updateUserDto.PhoneNumber!;
             existingUserInfo.EmailConfirmed = true;
             existingUserInfo.TwoFactorEnabled = updateUserDto.TowFactorEnabeld;
-            existingUserInfo.UpdatedAt = DateTime.UtcNow;
+            existingUserInfo.UpdatedAt = DateTime.Now;
 
             var updated = await _userManager.UpdateAsync(existingUserInfo);
             if (updated.Succeeded)

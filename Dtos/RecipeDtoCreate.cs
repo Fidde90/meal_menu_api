@@ -1,6 +1,6 @@
 ﻿namespace meal_menu_api.Dtos
 {
-    public class RecipeDto
+    public class RecipeDtoCreate
     {
         public string RecipeName { get; set; } = null!;
 

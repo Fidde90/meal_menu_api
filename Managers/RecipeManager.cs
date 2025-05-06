@@ -34,8 +34,8 @@ namespace meal_menu_api.Managers
                     Unit = unit,
                     RecipeId = recipe.Id,
                     Recipe = recipe,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
                 };
 
                 ingredientsToSave.Add(newIngredient);
@@ -64,8 +64,8 @@ namespace meal_menu_api.Managers
                     Description = item.Description,
                     RecipeId = recipe.Id,
                     Recipe = recipe,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
                 };
 
                 StepsToSave.Add(newStep);
@@ -96,8 +96,8 @@ namespace meal_menu_api.Managers
                     ImageUrl = filePath,
                     RecipeId = recipe.Id,
                     Recipe = recipe,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
                 };
 
                 await _datacontext.Images.AddAsync(newImage);

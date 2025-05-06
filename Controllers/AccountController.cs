@@ -42,7 +42,7 @@ namespace meal_menu_api.Controllers
                     Email = registerDto.Email,
                     UserName = registerDto.Email,
                     EmailConfirmed = true,
-                    UpdatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.Now,
                 };
 
                 var createUser = await _userManager.CreateAsync(newUser, registerDto.Password);
@@ -86,7 +86,7 @@ namespace meal_menu_api.Controllers
                         PhoneNumber      = existingUser.PhoneNumber ?? null,
                         EmailConfirmed   = existingUser.EmailConfirmed,
                         TowFactorEnabeld = existingUser.TwoFactorEnabled,
-                        LastLogin        = DateTime.UtcNow
+                        LastLogin        = DateTime.Now
                     };
 
                     existingUser.LastLogin = DateTime.UtcNow;
@@ -113,7 +113,7 @@ namespace meal_menu_api.Controllers
             if (!await _userManager.CheckPasswordAsync(user, changePasswordDto.Password))
                 return Unauthorized();
 
-            user.UpdatedAt = DateTime.UtcNow;
+            user.UpdatedAt = DateTime.Now;
             var passwordChanged = await _userManager.ChangePasswordAsync(user, changePasswordDto.Password, changePasswordDto.NewPassword);
 
             if (passwordChanged.Succeeded)

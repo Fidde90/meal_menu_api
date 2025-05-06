@@ -27,10 +27,10 @@ namespace meal_menu_api.Entities
 
         public DateTime UpdatedAt { get; set; }
 
-        public List<ImageEntity> Images { get; set; } = new List<ImageEntity>();
+        public List<ImageEntity> Images { get; set; } = new();
 
-        public List<IngredientEntity> Ingredients { get; set; } = new List<IngredientEntity>();
+        public List<IngredientEntity> Ingredients { get; set; } = new();
 
-        public List<StepEntity> Steps { get; set; } = new List<StepEntity>();   
+        public List<StepEntity> Steps { get; set; } = new();   
     }
 }

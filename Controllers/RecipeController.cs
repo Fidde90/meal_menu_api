@@ -3,8 +3,9 @@ using meal_menu_api.Dtos;
 using meal_menu_api.Entities;
 using meal_menu_api.Managers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Diagnostics;
 
@@ -14,27 +15,32 @@ namespace meal_menu_api.Controllers
     [Route("api/[controller]")]
     public class RecipeController : ControllerBase
     {
-        private readonly DataContext _datacontext;
+        private readonly DataContext _dataContext;
         private readonly RecipeManager _recipeManager;
+        private readonly UserManager<AppUser> _userManager;
 
-        public RecipeController(DataContext datacontext, RecipeManager recipeManager)
+        public RecipeController(DataContext dataContext, RecipeManager recipeManager, UserManager<AppUser> userManager)
         {
-            _datacontext = datacontext;
+            _dataContext = dataContext;
             _recipeManager = recipeManager;
+            _userManager = userManager;
         }
 
         [HttpPost]
         [Route("create")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> CreateRecipe(RecipeDto recipeDto)
+        public async Task<IActionResult> CreateRecipe(RecipeDtoCreate recipeDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            IEnumerable<IngredientDto> Ingredients = [];
-            IEnumerable<StepDto> Steps = [];
+   
+            AppUser? user = await _userManager.FindByEmailAsync(User.Identity!.Name!);
 
-            using var transaction = await _datacontext.Database.BeginTransactionAsync();
+            if (user == null)
+                return Unauthorized();
+
+            using var transaction = await _dataContext.Database.BeginTransactionAsync();
 
             try
             {
@@ -42,22 +48,32 @@ namespace meal_menu_api.Controllers
                 {
                     Name = recipeDto.RecipeName!,
                     Description = recipeDto.RecipeDescription!,
-                    Ppl = recipeDto.Ppl
+                    Ppl = recipeDto.Ppl,
+                    UserId = user.Id,
+                    User = user,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
                 };
 
-                _datacontext.Recipes.Add(newRecipe);
-                await _datacontext.SaveChangesAsync();
+                _dataContext.Recipes.Add(newRecipe);
+                await _dataContext.SaveChangesAsync();
 
                 if (!string.IsNullOrEmpty(recipeDto.Ingredients) && !string.IsNullOrEmpty(recipeDto.Steps))
                 {
-                    Ingredients = JsonConvert.DeserializeObject<IEnumerable<IngredientDto>>(recipeDto.Ingredients!)!;
-                    Steps = JsonConvert.DeserializeObject<IEnumerable<StepDto>>(recipeDto.Steps!)!;
+                    IEnumerable<IngredientDto> ingredients = [];
+                    IEnumerable<StepDto> steps = [];
 
-                    await _recipeManager.SaveIngredients(Ingredients!, newRecipe);
-                    await _recipeManager.SaveSteps(Steps!, newRecipe);
+                    ingredients = JsonConvert.DeserializeObject<IEnumerable<IngredientDto>>(recipeDto.Ingredients!)!;
+                    steps = JsonConvert.DeserializeObject<IEnumerable<StepDto>>(recipeDto.Steps!)!;
+
+                    if(ingredients != null && ingredients.Any())
+                        await _recipeManager.SaveIngredients(ingredients!, newRecipe);
+
+                    if(steps != null && steps.Any())
+                        await _recipeManager.SaveSteps(steps!, newRecipe);
                 }
 
-                if(recipeDto.Image != null)        
+                if (recipeDto.Image != null)
                     await _recipeManager.SaveImages(recipeDto.Image!, newRecipe);
 
                 await transaction.CommitAsync();
@@ -71,6 +87,89 @@ namespace meal_menu_api.Controllers
             }
 
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("get-all")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> GetAllRecipes()
+        {
+            AppUser? user = await _userManager.GetUserAsync(User);
+
+            if (user != null)
+            {
+                List<RecipeEntity> recipeEntities = _dataContext.Recipes.Where(r => r.UserId == user.Id)
+                    .Include(r => r.Ingredients).ThenInclude(i => i.Unit)
+                    .Include(r => r.Steps)
+                    .Include(r => r.Images)
+                    .OrderByDescending(r => r.CreatedAt)
+                    .AsNoTracking()
+                    .ToList();
+
+                if (recipeEntities.Count < 1)
+                    return NotFound();
+
+                List<RecipeDtoGet> recipeDtos = [];
+
+                foreach(RecipeEntity recipe in recipeEntities)
+                {
+                    RecipeDtoGet newRecipeDto = new()
+                    {
+                        Id = recipe.Id,
+                        Name = recipe.Name,
+                        Description = recipe.Description,
+                        Ppl = recipe.Ppl,
+                        CreatedAt = recipe.CreatedAt,
+                        UpdatedAt = recipe.UpdatedAt,
+                    };
+
+                    foreach (IngredientEntity ingredient in recipe.Ingredients)
+                    {
+                        IngredientDto newIngredient = new()
+                        {
+                            Name = ingredient.Name,
+                            Amount = ingredient.Amount,
+                            Unit = ingredient.Unit.Name ?? null,
+                            CreatedAt = ingredient.CreatedAt,
+                            UpdatedAt = ingredient.UpdatedAt,
+                        };
+
+                        newRecipeDto.Ingredients.Add(newIngredient);
+                    }
+
+                    foreach (StepEntity step in recipe.Steps)
+                    {
+                        StepDto newStep = new()
+                        {
+                            Description = step.Description,
+                            CreatedAt = step.CreatedAt,
+                            UpdatedAt = step.UpdatedAt,
+                        };
+
+                        newRecipeDto.Steps.Add(newStep);
+                    }
+
+                    foreach (ImageEntity iamge in recipe.Images)
+                    {
+                        ImageDto newImage = new()
+                        {
+                            Id = iamge.Id,
+                            ImageUrl = iamge.ImageUrl,
+                            CreatedAt = iamge.CreatedAt,
+                            UpdatedAt = iamge.UpdatedAt,
+                        };
+
+                        newRecipeDto.Images.Add(newImage);
+                    }
+
+                    recipeDtos.Add(newRecipeDto);
+
+                }
+
+                return Ok(recipeDtos);
+            }
+
+            return Unauthorized();
         }
     }
 }

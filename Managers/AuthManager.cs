@@ -10,7 +10,6 @@ namespace meal_menu_api.Managers
     public class AuthManager
     {
         private readonly IConfiguration _configuration;
-        private object user;
 
         public AuthManager(IConfiguration configuration)
         {
