@@ -1,6 +1,7 @@
 ﻿using meal_menu_api.Database.Context;
 using meal_menu_api.Dtos;
 using meal_menu_api.Entities;
+using meal_menu_api.Managers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -13,12 +14,13 @@ namespace meal_menu_api.Controllers
     [Route("api/[controller]")]
     public class RecipeController : ControllerBase
     {
-
         private readonly DataContext _datacontext;
+        private readonly RecipeManager _recipeManager;
 
-        public RecipeController(DataContext datacontext)
+        public RecipeController(DataContext datacontext, RecipeManager recipeManager)
         {
             _datacontext = datacontext;
+            _recipeManager = recipeManager;
         }
 
         [HttpPost]
@@ -26,13 +28,11 @@ namespace meal_menu_api.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> CreateRecipe(RecipeDto recipeDto)
         {
-
-            //LÄGG TILL ATT EN USER KAN HA MÅNGA RECEPT!!!
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var Ingredients = JsonConvert.DeserializeObject<IEnumerable<IngredientDto>>(recipeDto.Ingredients!);
-            var Steps = JsonConvert.DeserializeObject<IEnumerable<StepDto>>(recipeDto.Steps!);
+            IEnumerable<IngredientDto> Ingredients = [];
+            IEnumerable<StepDto> Steps = [];
 
             using var transaction = await _datacontext.Database.BeginTransactionAsync();
 
@@ -48,9 +48,17 @@ namespace meal_menu_api.Controllers
                 _datacontext.Recipes.Add(newRecipe);
                 await _datacontext.SaveChangesAsync();
 
-                await SaveIngredients(Ingredients!, newRecipe);
-                await SaveSteps(Steps!, newRecipe);
-                await SaveImages(recipeDto.Image!, newRecipe);
+                if (!string.IsNullOrEmpty(recipeDto.Ingredients) && !string.IsNullOrEmpty(recipeDto.Steps))
+                {
+                    Ingredients = JsonConvert.DeserializeObject<IEnumerable<IngredientDto>>(recipeDto.Ingredients!)!;
+                    Steps = JsonConvert.DeserializeObject<IEnumerable<StepDto>>(recipeDto.Steps!)!;
+
+                    await _recipeManager.SaveIngredients(Ingredients!, newRecipe);
+                    await _recipeManager.SaveSteps(Steps!, newRecipe);
+                }
+
+                if(recipeDto.Image != null)        
+                    await _recipeManager.SaveImages(recipeDto.Image!, newRecipe);
 
                 await transaction.CommitAsync();
             }
@@ -63,98 +71,6 @@ namespace meal_menu_api.Controllers
             }
 
             return Ok();
-        }
-
-        private async Task SaveIngredients(IEnumerable<IngredientDto> list, RecipeEntity recipe)
-        {
-            IEnumerable<UnitEntity> units = _datacontext.Units.ToList();
-            var ingredientsToSave = new List<IngredientEntity>();
-
-            foreach (var item in list)
-            {
-                UnitEntity unit = units.FirstOrDefault(x => x.Name == item.Unit)!;
-
-                IngredientEntity newIngredient = new IngredientEntity
-                {
-                    Name = item.Name,
-                    Amount = item.Amount,
-                    UnitId = unit.Id,
-                    Unit = unit,
-                    RecipeId = recipe.Id,
-                    Recipe = recipe,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
-                ingredientsToSave.Add(newIngredient);
-            }
-            try
-            {
-                _datacontext.Ingredients.AddRange(ingredientsToSave);
-                await _datacontext.SaveChangesAsync();
-            }
-            catch (Exception error)
-            {
-                Debug.WriteLine($"Error RecipeController, Saving Ingredients in SaveIngredients function: {error.Message}");
-                Console.WriteLine($"Error RecipeController, Saving Ingredients in SaveIngredients function: {error.Message}");
-                throw new Exception("Error saving Ingredients, transaction will be rolled back. ", error);
-            }
-        }
-        private async Task SaveSteps(IEnumerable<StepDto> list, RecipeEntity recipe)
-        {
-            var StepsToSave = new List<StepEntity>();
-
-            foreach (var item in list)
-            {
-                StepEntity newStep = new StepEntity
-                {
-                    Description = item.Description,
-                    RecipeId = recipe.Id,
-                    Recipe = recipe,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
-                StepsToSave.Add(newStep);
-            }
-            try
-            {
-                _datacontext.Steps.AddRange(StepsToSave);
-                await _datacontext.SaveChangesAsync();
-            }
-            catch (Exception error)
-            {
-                Debug.WriteLine($"Error RecipeController, Saving Steps in SaveSteps function: {error.Message}");
-                Console.WriteLine($"Error RecipeController, Saving Steps in SaveSteps function: {error.Message}");
-                throw new Exception("Error saving Steps, transaction will be rolled back. ", error);
-            }
-        }
-
-        private async Task SaveImages(IFormFile Image, RecipeEntity recipe)
-        {
-            var filePath = Path.Combine("Images", Image.FileName);
-            using var stream = new FileStream(filePath, FileMode.Create);
-            await Image.CopyToAsync(stream);
-            try
-            {
-                ImageEntity newImage = new ImageEntity
-                {
-                    ImageUrl = filePath,
-                    RecipeId = recipe.Id,
-                    Recipe = recipe,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
-                await _datacontext.Images.AddAsync(newImage);
-                await _datacontext.SaveChangesAsync();
-            }
-            catch (Exception error)
-            {
-                Debug.WriteLine($"Error RecipeController, Saving Image in SaveImages function: {error.Message}");
-                Console.WriteLine($"Error RecipeController, Saving Image in SaveImages function: {error.Message}");
-                throw new Exception("Error saving Images, transaction will be rolled back. ", error);
-            }
         }
     }
 }
