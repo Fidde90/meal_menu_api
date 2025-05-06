@@ -7,7 +7,7 @@ namespace meal_menu_api.Seeders
     {
         public static void SeedUnits(DataContext context)
         {
-            var units = new List<string> { "ml", "cl", "dl", "l", "mg", "g", "hg", "kg" };
+            var units = new List<string> { "ml", "cl", "dl", "l", "mg", "g", "hg", "kg", "st" };
 
             foreach (var unitName in units)
             {
