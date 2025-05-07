@@ -87,8 +87,8 @@ namespace meal_menu_api.Managers
         {
             var filePath = Path.Combine("Images", Image.FileName);
             using var stream = new FileStream(filePath, FileMode.Create);
-
             await Image.CopyToAsync(stream);
+
             try
             {
                 ImageEntity newImage = new ImageEntity

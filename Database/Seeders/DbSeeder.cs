@@ -1,5 +1,6 @@
 ﻿using meal_menu_api.Database.Context;
 using meal_menu_api.Entities;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace meal_menu_api.Database.Seeders
 {
@@ -146,11 +147,11 @@ namespace meal_menu_api.Database.Seeders
                     // 6. Images
                     var images = new List<ImageEntity>
                     {
-                        new() { RecipeId = recipes["Köttbullar"], ImageUrl = "Images\\83923389_2656711937758318_2068353204898234368_o.jpg" },
-                        new() { RecipeId = recipes["Kycklinggryta"], ImageUrl = "Images\\kycklinggryta-med-curry-foto-nurlan-mathem.jpg" },
-                        new() { RecipeId = recipes["Räksallad med sparris och sojamajonnäs"], ImageUrl = "Images\\raksallad-med-sparris-och-sojamajonnas_17560.avif" },
-                        new() { RecipeId = recipes["Potatissoppa med fänkål och purjolök"], ImageUrl = "Images\\potatis-och-fankalssoppa-med-purjolok_17562.avif" },
-                        new() { RecipeId = recipes["Lammgryta med kikärtor"], ImageUrl = "Images\\lammgryta-med-kikartor-och-yoghurtsas_17561.avif" }
+                        new() { RecipeId = recipes["Köttbullar"], ImageUrl = "Images\\köttbullar.jpg" },
+                        new() { RecipeId = recipes["Kycklinggryta"], ImageUrl = "Images\\kyckliggryta.jpg" },
+                        new() { RecipeId = recipes["Räksallad med sparris och sojamajonnäs"], ImageUrl = "Images\\räksallad.jpg" },
+                        new() { RecipeId = recipes["Potatissoppa med fänkål och purjolök"], ImageUrl = "Images\\potatissoppa.jpg" },
+                        new() { RecipeId = recipes["Lammgryta med kikärtor"], ImageUrl = "Images\\lammgryta.jpg" }
                     };
 
                     foreach (var image in images)

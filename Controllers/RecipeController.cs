@@ -149,14 +149,14 @@ namespace meal_menu_api.Controllers
                         newRecipeDto.Steps.Add(newStep);
                     }
 
-                    foreach (ImageEntity iamge in recipe.Images)
+                    foreach (ImageEntity image in recipe.Images)
                     {
                         ImageDto newImage = new()
                         {
-                            Id = iamge.Id,
-                            ImageUrl = iamge.ImageUrl,
-                            CreatedAt = iamge.CreatedAt,
-                            UpdatedAt = iamge.UpdatedAt,
+                            Id = image.Id,
+                            ImageUrl = image.ImageUrl?.Replace("\\", "/")!,
+                            CreatedAt = image.CreatedAt,
+                            UpdatedAt = image.UpdatedAt,
                         };
 
                         newRecipeDto.Images.Add(newImage);

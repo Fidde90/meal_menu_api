@@ -24,8 +24,4 @@
     <PackageReference Include="swashbuckle.aspnetcore" Version="8.1.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Images\" />
-  </ItemGroup>
-
 </Project>

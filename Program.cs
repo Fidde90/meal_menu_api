@@ -33,8 +33,7 @@ namespace meal_menu_api
             builder.Services.RegisterJwt(builder.Configuration);
 
             // Global Apinyckel och ser till att Jsonobject inte hamnar i en stack overflow
-            builder.Services.AddControllers(options => { options.Filters.Add<UseApiKeyAttribute>();})
-              ;
+            builder.Services.AddControllers(options => { options.Filters.Add<UseApiKeyAttribute>();});
 
             // Identity user regler
             builder.Services.AddDefaultIdentity<AppUser>(x => {
@@ -71,7 +70,7 @@ namespace meal_menu_api
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Images")),
-                RequestPath = "/uploads"  // URL-prefix som du använder för att komma åt bilder
+                RequestPath = "/Images"  // URL-prefix som du använder för att komma åt bilder
             });
 
             // Configure the HTTP request pipeline
