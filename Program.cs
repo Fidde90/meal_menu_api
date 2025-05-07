@@ -34,7 +34,7 @@ namespace meal_menu_api
 
             // Global Apinyckel och ser till att Jsonobject inte hamnar i en stack overflow
             builder.Services.AddControllers(options => { options.Filters.Add<UseApiKeyAttribute>();})
-                .AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; });
+              ;
 
             // Identity user regler
             builder.Services.AddDefaultIdentity<AppUser>(x => {
