@@ -3,6 +3,7 @@ using meal_menu_api.Dtos;
 using meal_menu_api.Entities;
 using meal_menu_api.Managers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -170,6 +171,76 @@ namespace meal_menu_api.Controllers
             }
 
             return Unauthorized();
+        }
+
+        [HttpGet]
+        [Route("get-recipe/{id}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> GetRecipe(string id)
+        {
+
+            var recipe = await _dataContext.Recipes.Include(recipe => recipe.Ingredients)
+                .ThenInclude(ingredient => ingredient.Unit)
+                .Include(recipe => recipe.Steps)
+                .Include(recipe => recipe.Images)
+                .FirstOrDefaultAsync(recipe => recipe.Id.ToString() == id);
+
+            if (recipe != null)
+            {
+                RecipeDtoGet newRecipeDto = new()
+                {
+                    Id = recipe!.Id,
+                    Name = recipe.Name,
+                    Description = recipe.Description,
+                    Ppl = recipe.Ppl,
+                    CreatedAt = recipe.CreatedAt,
+                    UpdatedAt = recipe.UpdatedAt,
+                };
+
+                foreach (IngredientEntity ingredient in recipe.Ingredients)
+                {
+                    IngredientDto newIngredient = new()
+                    {
+                        Name = ingredient.Name,
+                        Amount = ingredient.Amount,
+                        Unit = ingredient.Unit.Name ?? null,
+                        CreatedAt = ingredient.CreatedAt,
+                        UpdatedAt = ingredient.UpdatedAt,
+                    };
+
+                    newRecipeDto.Ingredients.Add(newIngredient);
+                }
+
+                foreach (StepEntity step in recipe.Steps)
+                {
+                    StepDto newStep = new()
+                    {
+                        Description = step.Description,
+                        CreatedAt = step.CreatedAt,
+                        UpdatedAt = step.UpdatedAt,
+                    };
+
+                    newRecipeDto.Steps.Add(newStep);
+                }
+
+                foreach (ImageEntity image in recipe.Images)
+                {
+                    ImageDto newImage = new()
+                    {
+                        Id = image.Id,
+                        ImageUrl = image.ImageUrl?.Replace("\\", "/")!,
+                        CreatedAt = image.CreatedAt,
+                        UpdatedAt = image.UpdatedAt,
+                    };
+
+                    newRecipeDto.Images.Add(newImage);
+                }
+
+                return Ok(newRecipeDto);
+            }
+
+            return NotFound();
+   
         }
     }
 }
