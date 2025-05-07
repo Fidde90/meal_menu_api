@@ -1,6 +1,7 @@
 ﻿using meal_menu_api.Database.Context;
 using meal_menu_api.Dtos;
 using meal_menu_api.Entities;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 namespace meal_menu_api.Managers
@@ -85,7 +86,7 @@ namespace meal_menu_api.Managers
 
         public async Task SaveImages(IFormFile Image, RecipeEntity recipe)
         {
-            var filePath = Path.Combine("Images", Image.FileName);
+            string filePath = Path.Combine("Images", Image.FileName);
             using var stream = new FileStream(filePath, FileMode.Create);
             await Image.CopyToAsync(stream);
 
@@ -108,6 +109,19 @@ namespace meal_menu_api.Managers
                 Debug.WriteLine($"Error RecipeController, Saving Image in SaveImages function: {error.Message}");
                 Console.WriteLine($"Error RecipeController, Saving Image in SaveImages function: {error.Message}");
                 throw new Exception("Error saving Images, transaction will be rolled back. ", error);
+            }
+        }
+
+        public async Task DeleteImage(int recipeId)
+        {
+            ImageEntity? existingImage = await _datacontext.Images.FirstOrDefaultAsync(i => i.RecipeId == recipeId);
+            if(existingImage != null)
+            {
+                var filePath = Path.Combine(existingImage!.ImageUrl);
+                File.Delete(filePath);
+
+                _datacontext.Images.Remove(existingImage);
+                await _datacontext.SaveChangesAsync();
             }
         }
     }

@@ -3,12 +3,12 @@ using meal_menu_api.Dtos;
 using meal_menu_api.Entities;
 using meal_menu_api.Managers;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace meal_menu_api.Controllers
 {
@@ -178,8 +178,10 @@ namespace meal_menu_api.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> GetRecipe(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return BadRequest();
 
-            var recipe = await _dataContext.Recipes.Include(recipe => recipe.Ingredients)
+            RecipeEntity? recipe = await _dataContext.Recipes.Include(recipe => recipe.Ingredients)
                 .ThenInclude(ingredient => ingredient.Unit)
                 .Include(recipe => recipe.Steps)
                 .Include(recipe => recipe.Images)
@@ -239,8 +241,62 @@ namespace meal_menu_api.Controllers
                 return Ok(newRecipeDto);
             }
 
+            return NotFound();  
+        }
+
+        [HttpDelete]
+        [Route("delete/{id}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> DeleteRecipe(string id)
+        {
+            RecipeEntity? recipeToDelete = await _dataContext.Recipes.FirstOrDefaultAsync(r => r.Id.ToString() == id) ?? null;
+
+            if (recipeToDelete != null)
+            {
+                _dataContext.Recipes.Remove(recipeToDelete);
+                await _dataContext.SaveChangesAsync();
+                return NoContent();
+            }
+
             return NotFound();
-   
+        }
+
+        [HttpPut]
+        [Route("update/{id}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<IActionResult> UpdateRecipe(string id, RecipeDtoCreate recipeDto )
+        {
+
+            AppUser? user = await _userManager.FindByEmailAsync(User!.Identity!.Name!);
+            RecipeEntity? recipeEntity = await _dataContext.Recipes.FirstOrDefaultAsync(r => r.Id.ToString() == id) ?? null;
+
+            recipeEntity!.Name = recipeDto.RecipeName;
+            recipeEntity.Description = recipeDto.RecipeDescription; 
+            recipeEntity.Ppl = recipeDto.Ppl;
+            recipeEntity.UpdatedAt = DateTime.Now;
+
+
+            if(recipeDto.DeleteImage && recipeDto.Image == null) //RADERA
+                 await _recipeManager.DeleteImage(recipeEntity.Id);
+
+            if(recipeDto.Image != null && !recipeDto.DeleteImage) //BYT UT
+            {
+                await _recipeManager.DeleteImage(recipeEntity.Id);
+                await _recipeManager.SaveImages(recipeDto.Image, recipeEntity);
+            }
+
+
+            //if(!recipeDto.DeleteImg && recipeDto.Image == null)
+
+
+
+
+            //if (recipeDto.Image != null)
+            //    await _recipeManager.SaveImages(recipeDto.Image!, recipeEntity);
+
+            await _dataContext.SaveChangesAsync();
+
+            return Ok();
         }
     }
 }

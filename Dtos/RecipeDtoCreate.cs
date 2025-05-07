@@ -10,6 +10,8 @@
 
         public IFormFile? Image { get; set; }
 
+        public bool DeleteImage { get; set; } = false;
+
         public string? Ingredients { get; set; }
 
         public string? Steps { get; set; }
