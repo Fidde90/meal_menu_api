@@ -281,7 +281,30 @@ namespace meal_menu_api.Controllers
 
 
             List<IngredientDto> ingredientDtos = JsonConvert.DeserializeObject<List<IngredientDto>>(recipeDto.Ingredients!)!;
+            List<StepDto> stepDtos = JsonConvert.DeserializeObject<List<StepDto>>(recipeDto.Steps!)!;
 
+            if (stepDtos.Count < 1)
+                await _dataContext.Steps.Where(s => s.RecipeId == recipeEntity.Id).ExecuteDeleteAsync();
+
+            if (stepDtos.Count > 0)
+            {
+                List<StepDto> newSteps = [];
+                List<StepDto> oldSteps = [];
+
+                foreach (StepDto stepDto in stepDtos)
+                {
+                    if (stepDto.Id == -1)
+                        newSteps.Add(stepDto);
+                    else
+                        oldSteps.Add(stepDto);
+                }
+
+                if (oldSteps.Count != 0)
+                    await _recipeManager.UpdateStepsAsync(oldSteps, recipeEntity);
+
+                if (newSteps.Count != 0)
+                    await _recipeManager.SaveSteps(newSteps, recipeEntity);
+            }
 
             if (ingredientDtos.Count < 1)         
                 await _dataContext.Ingredients.Where(i => i.RecipeId == recipeEntity.Id).ExecuteDeleteAsync();

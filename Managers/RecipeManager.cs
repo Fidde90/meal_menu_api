@@ -96,7 +96,35 @@ namespace meal_menu_api.Managers
             }
 
             await _datacontext.SaveChangesAsync();
-        }   
+        }
+
+        public async Task UpdateStepsAsync(List<StepDto> stepDtoList, RecipeEntity recipe)
+        {
+            List<StepEntity> stepEntities = _datacontext.Steps.Where(s => s.RecipeId == recipe.Id).ToList();
+
+            if (stepEntities == null)
+                return;
+
+            var StepsToRemove = stepEntities
+                .Where(entity => !stepDtoList.Any(dto => dto.Id == entity.Id))
+                .ToList();
+
+            _datacontext.Steps.RemoveRange(StepsToRemove);
+
+            List<StepEntity> UpdatedEntities = [];
+            Dictionary<int, StepDto> dtoDictionary = stepDtoList.ToDictionary(dto => dto.Id);
+
+            foreach (StepEntity step in stepEntities)
+            {
+                if (dtoDictionary.TryGetValue(step.Id, out var dto))
+                {
+                    step.Description = dto.Description;
+                    step.UpdatedAt = DateTime.Now;
+                }
+            }
+
+            await _datacontext.SaveChangesAsync();
+        }
 
         public async Task SaveSteps(IEnumerable<StepDto> list, RecipeEntity recipe)
         {
