@@ -42,6 +42,7 @@ namespace meal_menu_api.Controllers
                     Email = registerDto.Email,
                     UserName = registerDto.Email,
                     EmailConfirmed = true,
+                    CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now,
                 };
 
