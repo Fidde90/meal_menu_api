@@ -158,7 +158,7 @@ namespace meal_menu_api.Managers
 
         public async Task SaveImages(IFormFile Image, RecipeEntity recipe)
         {
-            string filePath = Path.Combine("Images", Image.FileName);
+            string filePath = Path.Combine("Images", $"{recipe.Id}_" + Image.FileName);
             using var stream = new FileStream(filePath, FileMode.Create);
             await Image.CopyToAsync(stream);
 

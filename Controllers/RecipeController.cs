@@ -270,18 +270,15 @@ namespace meal_menu_api.Controllers
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> UpdateRecipe(string id, RecipeDtoCreate recipeDto )
         {
-
             AppUser? user = await _userManager.FindByEmailAsync(User!.Identity!.Name!);
             RecipeEntity? recipeEntity = await _dataContext.Recipes.FirstOrDefaultAsync(r => r.Id.ToString() == id) ?? null;
+            List<IngredientDto> ingredientDtos = JsonConvert.DeserializeObject<List<IngredientDto>>(recipeDto.Ingredients!)!;
+            List<StepDto> stepDtos = JsonConvert.DeserializeObject<List<StepDto>>(recipeDto.Steps!)!;
 
             recipeEntity!.Name = recipeDto.RecipeName;
             recipeEntity.Description = recipeDto.RecipeDescription; 
             recipeEntity.Ppl = recipeDto.Ppl;
             recipeEntity.UpdatedAt = DateTime.Now;
-
-
-            List<IngredientDto> ingredientDtos = JsonConvert.DeserializeObject<List<IngredientDto>>(recipeDto.Ingredients!)!;
-            List<StepDto> stepDtos = JsonConvert.DeserializeObject<List<StepDto>>(recipeDto.Steps!)!;
 
             if (stepDtos.Count < 1)
                 await _dataContext.Steps.Where(s => s.RecipeId == recipeEntity.Id).ExecuteDeleteAsync();
@@ -329,7 +326,6 @@ namespace meal_menu_api.Controllers
                     await _recipeManager.SaveIngredients(newIngredients, recipeEntity);
             }
 
-
             //LÄGG TILL NÅGOT ID ELLER NÅTT SOM INDEKERAR ATT EN
             //BILD TILLHÖR ETT SPCIELLT RECEPT.
             //I DET FALLET KAN DET FINNS 2 LIKADANA I DATABASEN/MAPPEN,
@@ -344,7 +340,6 @@ namespace meal_menu_api.Controllers
                 await _recipeManager.DeleteImage(recipeEntity.Id);
                 await _recipeManager.SaveImages(recipeDto.Image, recipeEntity);
             }
-
 
             await _dataContext.SaveChangesAsync();
 
