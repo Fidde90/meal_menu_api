@@ -58,19 +58,14 @@ namespace meal_menu_api.Managers
         {
             List<IngredientEntity> ingredientEntities = _datacontext.Ingredients.Where(i => i.RecipeId == recipe.Id).ToList();
 
-
-
             if (ingredientEntities == null)
                 return;
-
 
             var ingredientsToRemove = ingredientEntities
                 .Where(entity => !ingredientDtoList.Any(dto => dto.Id == entity.Id))
                 .ToList();
 
             _datacontext.Ingredients.RemoveRange(ingredientsToRemove);
-
-
 
             List<IngredientEntity> UpdatedEntities = [];
             Dictionary<int, IngredientDto> dtoDictionary = ingredientDtoList.ToDictionary(dto => dto.Id);

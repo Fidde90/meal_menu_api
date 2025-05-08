@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Diagnostics;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace meal_menu_api.Controllers
 {
@@ -257,6 +256,8 @@ namespace meal_menu_api.Controllers
 
             if (recipeToDelete != null)
             {
+                await _recipeManager.DeleteImage(recipeToDelete.Id);
+
                 _dataContext.Recipes.Remove(recipeToDelete);
                 await _dataContext.SaveChangesAsync();
                 return NoContent();
@@ -325,12 +326,6 @@ namespace meal_menu_api.Controllers
                 if (newIngredients.Count != 0)
                     await _recipeManager.SaveIngredients(newIngredients, recipeEntity);
             }
-
-            //LÄGG TILL NÅGOT ID ELLER NÅTT SOM INDEKERAR ATT EN
-            //BILD TILLHÖR ETT SPCIELLT RECEPT.
-            //I DET FALLET KAN DET FINNS 2 LIKADANA I DATABASEN/MAPPEN,
-            //ANNARS BLIR DET ATT OM MAN HAR 2 RECEPT MED SAMMA BILD OCH
-            //RADERAR PÅ ENA RECEPTET SÅ FÖRSVINNER DEN FÖR BÅDA.
 
             if(recipeDto.DeleteImage && recipeDto.Image == null) //RADERA
                  await _recipeManager.DeleteImage(recipeEntity.Id);
