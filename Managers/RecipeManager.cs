@@ -54,6 +54,50 @@ namespace meal_menu_api.Managers
             }
         }
 
+        public async Task UpdateIngredientsAsync(List<IngredientDto> ingredientDtoList, RecipeEntity recipe)
+        {
+            List<IngredientEntity> ingredientEntities = _datacontext.Ingredients.Where(i => i.RecipeId == recipe.Id).ToList();
+
+
+
+            if (ingredientEntities == null)
+                return;
+
+
+            var ingredientsToRemove = ingredientEntities
+                .Where(entity => !ingredientDtoList.Any(dto => dto.Id == entity.Id))
+                .ToList();
+
+            _datacontext.Ingredients.RemoveRange(ingredientsToRemove);
+
+
+
+            List<IngredientEntity> UpdatedEntities = [];
+            Dictionary<int, IngredientDto> dtoDictionary = ingredientDtoList.ToDictionary(dto => dto.Id);
+            List<UnitEntity> units = await _datacontext.Units.ToListAsync();
+            UnitEntity? unit;
+
+            foreach (IngredientEntity ingredient in ingredientEntities)
+            {
+                if (dtoDictionary.TryGetValue(ingredient.Id, out var dto))
+                {
+                    ingredient.Name = dto.Name;
+                    ingredient.Amount = dto.Amount;
+
+                    if (!string.IsNullOrEmpty(dto.Unit))
+                    {
+                        unit = units.FirstOrDefault(u => u.Name == dto.Unit)!;
+                        ingredient.UnitId = unit.Id;
+                        ingredient.Unit = unit;
+                    }
+
+                    ingredient.UpdatedAt = DateTime.Now;
+                }
+            }
+
+            await _datacontext.SaveChangesAsync();
+        }   
+
         public async Task SaveSteps(IEnumerable<StepDto> list, RecipeEntity recipe)
         {
             var StepsToSave = new List<StepEntity>();

@@ -10,6 +10,7 @@ namespace meal_menu_api.Entities
 
         [ForeignKey(nameof(Recipe))]
         public int RecipeId { get; set; }
+
         public RecipeEntity Recipe { get; set; } = null!;
 
         [Required]

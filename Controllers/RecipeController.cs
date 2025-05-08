@@ -128,6 +128,7 @@ namespace meal_menu_api.Controllers
                     {
                         IngredientDto newIngredient = new()
                         {
+                            Id = ingredient.Id,
                             Name = ingredient.Name,
                             Amount = ingredient.Amount,
                             Unit = ingredient.Unit.Name ?? null,
@@ -142,6 +143,7 @@ namespace meal_menu_api.Controllers
                     {
                         StepDto newStep = new()
                         {
+                            Id = step.Id,
                             Description = step.Description,
                             CreatedAt = step.CreatedAt,
                             UpdatedAt = step.UpdatedAt,
@@ -202,7 +204,8 @@ namespace meal_menu_api.Controllers
                 foreach (IngredientEntity ingredient in recipe.Ingredients)
                 {
                     IngredientDto newIngredient = new()
-                    {
+                    { 
+                        Id = ingredient.Id,
                         Name = ingredient.Name,
                         Amount = ingredient.Amount,
                         Unit = ingredient.Unit.Name ?? null,
@@ -217,6 +220,7 @@ namespace meal_menu_api.Controllers
                 {
                     StepDto newStep = new()
                     {
+                        Id = step.Id,
                         Description = step.Description,
                         CreatedAt = step.CreatedAt,
                         UpdatedAt = step.UpdatedAt,
@@ -276,23 +280,48 @@ namespace meal_menu_api.Controllers
             recipeEntity.UpdatedAt = DateTime.Now;
 
 
+            List<IngredientDto> ingredientDtos = JsonConvert.DeserializeObject<List<IngredientDto>>(recipeDto.Ingredients!)!;
+
+
+            if (ingredientDtos.Count < 1)         
+                await _dataContext.Ingredients.Where(i => i.RecipeId == recipeEntity.Id).ExecuteDeleteAsync();
+            
+            if (ingredientDtos.Count > 0)
+            {
+                List<IngredientDto> newIngredients = [];
+                List<IngredientDto> oldIngredients = [];
+
+                foreach (IngredientDto ingredientDto in ingredientDtos)
+                {
+                    if (ingredientDto.Id == -1)
+                        newIngredients.Add(ingredientDto);
+                    else
+                        oldIngredients.Add(ingredientDto);
+                }
+
+                if (oldIngredients.Count != 0)
+                    await _recipeManager.UpdateIngredientsAsync(oldIngredients, recipeEntity);
+
+                if (newIngredients.Count != 0)
+                    await _recipeManager.SaveIngredients(newIngredients, recipeEntity);
+            }
+
+
+            //LÄGG TILL NÅGOT ID ELLER NÅTT SOM INDEKERAR ATT EN
+            //BILD TILLHÖR ETT SPCIELLT RECEPT.
+            //I DET FALLET KAN DET FINNS 2 LIKADANA I DATABASEN/MAPPEN,
+            //ANNARS BLIR DET ATT OM MAN HAR 2 RECEPT MED SAMMA BILD OCH
+            //RADERAR PÅ ENA RECEPTET SÅ FÖRSVINNER DEN FÖR BÅDA.
+
             if(recipeDto.DeleteImage && recipeDto.Image == null) //RADERA
                  await _recipeManager.DeleteImage(recipeEntity.Id);
 
-            if(recipeDto.Image != null && !recipeDto.DeleteImage) //BYT UT
+            if(recipeDto.Image != null && !recipeDto.DeleteImage) //BYT UT //BEHÅLL
             {
                 await _recipeManager.DeleteImage(recipeEntity.Id);
                 await _recipeManager.SaveImages(recipeDto.Image, recipeEntity);
             }
 
-
-            //if(!recipeDto.DeleteImg && recipeDto.Image == null)
-
-
-
-
-            //if (recipeDto.Image != null)
-            //    await _recipeManager.SaveImages(recipeDto.Image!, recipeEntity);
 
             await _dataContext.SaveChangesAsync();
 
