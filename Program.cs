@@ -39,7 +39,7 @@ namespace meal_menu_api
             builder.Services.AddDefaultIdentity<AppUser>(x => {
                 x.SignIn.RequireConfirmedAccount = false;
                 x.Password.RequiredLength = 3;
-                x.User.RequireUniqueEmail = true;
+                x.User.RequireUniqueEmail = false; //kanske? men då fungerarju inte conflict grejen
                 x.Password.RequireDigit = false;
                 x.Password.RequireNonAlphanumeric = false;
                 x.Password.RequireUppercase = false;

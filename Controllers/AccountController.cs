@@ -29,8 +29,13 @@ namespace meal_menu_api.Controllers
         [Route("register")]
         public async Task<IActionResult> RegisterUser(RegisterUserDto registerDto)
         {
+        
             if (ModelState.IsValid)
             {
+                var user = _dataContext.Users.FirstOrDefault(u => u.Email == registerDto.Email);
+                if (user != null)
+                    return Conflict("A user with this email already exists");
+
                 var existingUser = await _dataContext.Set<AppUser>().FindAsync(registerDto.Email);
                 if (existingUser != null)
                     return Conflict();

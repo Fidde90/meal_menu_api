@@ -18,7 +18,7 @@ namespace meal_menu_api.Controllers
             _userManager = userManager;
         }
 
-        [Route("get-user")]
+        [Route("get")]
         [UseApiKey]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> GetUser()
