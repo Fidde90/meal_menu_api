@@ -1,4 +1,5 @@
 ﻿
+using meal_menu_api.Helpers;
 using meal_menu_api.Managers;
 
 namespace meal_menu_api.Config
@@ -9,6 +10,7 @@ namespace meal_menu_api.Config
         {
             services.AddScoped<AuthManager>();
             services.AddScoped<RecipeManager>();
+            services.AddScoped<ToolBox>();
         }
     }
 }

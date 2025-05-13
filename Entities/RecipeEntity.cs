@@ -23,6 +23,8 @@ namespace meal_menu_api.Entities
 
         public int Ppl {  get; set; }
 
+        public int RotationPoints { get; set; } = 0;
+
         public DateTime CreatedAt { get; set; }
 
         public DateTime UpdatedAt { get; set; }
