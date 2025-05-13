@@ -1,6 +1,7 @@
 ﻿using meal_menu_api.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace meal_menu_api.Database.Context
 {
@@ -16,6 +17,10 @@ namespace meal_menu_api.Database.Context
         public DbSet<ImageEntity> Images { get; set; }
 
         public DbSet<UnitEntity> Units { get; set; }
+
+        public DbSet<DinnerScheduleEntity> DinnerSchedules { get; set; }
+
+        public DbSet<DinnerEntity> Dinners { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,9 +57,23 @@ namespace meal_menu_api.Database.Context
             // Ingredient -> Unit (DO NOT cascade delete here!)
             modelBuilder.Entity<IngredientEntity>()
                 .HasOne(i => i.Unit)
-                .WithMany() // no navigation back needed
+                .WithMany() 
                 .HasForeignKey(i => i.UnitId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of a unit if used
+                .OnDelete(DeleteBehavior.Restrict); 
+
+            // DinnerSchedule → Dinners = Cascade delete
+            modelBuilder.Entity<DinnerEntity>()
+                .HasOne(d => d.DinnerSchedule)
+                .WithMany(ds => ds.Dinners) 
+                .HasForeignKey(d => d.DinnerScheduleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Dinner → Recipe = Restrict delete 
+            modelBuilder.Entity<DinnerEntity>()
+                 .HasOne(d => d.Recipe)
+                 .WithMany()
+                 .HasForeignKey(d => d.RecipeId)
+                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

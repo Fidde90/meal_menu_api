@@ -1,0 +1,24 @@
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace meal_menu_api.Entities
+{
+    public class DinnerScheduleEntity
+    {
+        public int Id { get; set; }
+
+        [ForeignKey(nameof(User))]
+        public string UserId { get; set; } = null!;
+
+        public AppUser User { get; set; } = null!;
+
+        public DateTime StartsAtDate { get; set; }
+
+        public DateTime EndsAtDate { get; set; }
+        
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
+
+        public List<DinnerEntity> Dinners { get; set; } = new List<DinnerEntity>();
+    }
+}
