@@ -29,6 +29,7 @@ namespace meal_menu_api.Managers
 
                 IngredientEntity newIngredient = new IngredientEntity
                 {
+                    Description = item.Description,
                     Name = item.Name,
                     Amount = item.Amount,
                     UnitId = unit.Id,
@@ -76,6 +77,7 @@ namespace meal_menu_api.Managers
             {
                 if (dtoDictionary.TryGetValue(ingredient.Id, out var dto))
                 {
+                    ingredient.Description = dto.Description;
                     ingredient.Name = dto.Name;
                     ingredient.Amount = dto.Amount;
 

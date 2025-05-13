@@ -16,6 +16,8 @@ namespace meal_menu_api.Entities
         public int RecipeId { get; set; }
         public RecipeEntity Recipe { get; set; } = null!;
 
+        public string? Description { get; set; }
+
         [Required]
         [MinLength(2)]
         public string Name { get; set; } = null!;

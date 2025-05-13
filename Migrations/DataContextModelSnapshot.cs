@@ -254,7 +254,7 @@ namespace meal_menu_api.Migrations
                     b.Property<DateTime>("EatAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("RecipeId")
+                    b.Property<int?>("RecipeId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -341,6 +341,9 @@ namespace meal_menu_api.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -516,8 +519,7 @@ namespace meal_menu_api.Migrations
                     b.HasOne("meal_menu_api.Entities.RecipeEntity", "Recipe")
                         .WithMany()
                         .HasForeignKey("RecipeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("DinnerSchedule");
 

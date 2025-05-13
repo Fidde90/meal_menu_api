@@ -115,7 +115,7 @@ namespace meal_menu_api.Controllers
                 {
                     RecipeDtoGet newRecipeDto = new()
                     {
-                        Id = recipe.Id,
+                        Id = recipe.Id,                       
                         Name = recipe.Name,
                         Description = recipe.Description,
                         Ppl = recipe.Ppl,
@@ -128,6 +128,7 @@ namespace meal_menu_api.Controllers
                         IngredientDto newIngredient = new()
                         {
                             Id = ingredient.Id,
+                            Description = ingredient.Description,
                             Name = ingredient.Name,
                             Amount = ingredient.Amount,
                             Unit = ingredient.Unit.Name ?? null,
@@ -205,6 +206,7 @@ namespace meal_menu_api.Controllers
                     IngredientDto newIngredient = new()
                     { 
                         Id = ingredient.Id,
+                        Description = ingredient.Description,
                         Name = ingredient.Name,
                         Amount = ingredient.Amount,
                         Unit = ingredient.Unit.Name ?? null,

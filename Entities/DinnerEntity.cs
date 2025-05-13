@@ -11,9 +11,9 @@ namespace meal_menu_api.Entities
         public DinnerScheduleEntity DinnerSchedule { get; set; } = null!;
       
         [ForeignKey(nameof(Recipe))]
-         public int RecipeId { get; set; }
+         public int? RecipeId { get; set; }
      
-        public RecipeEntity Recipe { get; set; } = null!;
+        public RecipeEntity? Recipe { get; set; }
 
         public DateTime EatAt { get; set; }
         
