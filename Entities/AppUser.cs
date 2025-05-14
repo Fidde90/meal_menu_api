@@ -14,7 +14,10 @@ namespace meal_menu_api.Entities
 
         public DateTime LastLogin { get; set; }
 
+        public List<ShoppingListEntity> ShoppingLists { get; set; } = new List<ShoppingListEntity>();
+
         public List<DinnerScheduleEntity> Schedules { get; set; } = new List<DinnerScheduleEntity>();
+
         public List<RecipeEntity> Recipes { get; set; } = new List<RecipeEntity>();
     }
 }

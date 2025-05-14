@@ -19,6 +19,8 @@ namespace meal_menu_api.Entities
 
         public DateTime UpdatedAt { get; set; }
 
+        public ShoppingListEntity? ShoppingList { get; set; }
+
         public List<DinnerEntity> Dinners { get; set; } = new List<DinnerEntity>();
     }
 }

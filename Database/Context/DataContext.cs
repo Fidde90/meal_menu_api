@@ -22,64 +22,74 @@ namespace meal_menu_api.Database.Context
 
         public DbSet<DinnerEntity> Dinners { get; set; }
 
+        public DbSet<ShoppingListEntity> ShoppingLists { get; set; }
+
+        public DbSet<ShoppingListIngredientEntity> ShoppingListIngredients { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
             // Recipes -> Users: Delete Recipes when User is deleted
             modelBuilder.Entity<RecipeEntity>()
                 .HasOne(r => r.User)
                 .WithMany(u => u.Recipes)
                 .HasForeignKey(r => r.UserId)
-                .OnDelete(DeleteBehavior.Cascade); // User deleted => Recipes deleted
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Recipe -> Ingredients: Delete Ingredients when Recipe is deleted
+            // Recipe -> Ingredients
             modelBuilder.Entity<IngredientEntity>()
                 .HasOne(i => i.Recipe)
                 .WithMany(r => r.Ingredients)
                 .HasForeignKey(i => i.RecipeId)
-                .OnDelete(DeleteBehavior.Cascade); // Recipe deleted => Ingredients deleted
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Recipe -> Steps: Delete Steps when Recipe is deleted
+            // Recipe -> Steps
             modelBuilder.Entity<StepEntity>()
                 .HasOne(s => s.Recipe)
                 .WithMany(r => r.Steps)
                 .HasForeignKey(s => s.RecipeId)
-                .OnDelete(DeleteBehavior.Cascade); // Recipe deleted => Steps deleted
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Recipe -> Images: Delete Images when Recipe is deleted
+            // Recipe -> Images
             modelBuilder.Entity<ImageEntity>()
                 .HasOne(img => img.Recipe)
                 .WithMany(r => r.Images)
                 .HasForeignKey(img => img.RecipeId)
-                .OnDelete(DeleteBehavior.Cascade); // Recipe deleted => Images deleted
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Ingredient -> Unit (DO NOT cascade delete here!)
+            // Ingredient -> Unit: Restrict delete
             modelBuilder.Entity<IngredientEntity>()
                 .HasOne(i => i.Unit)
                 .WithMany()
                 .HasForeignKey(i => i.UnitId)
-                .OnDelete(DeleteBehavior.Restrict); // Restrict delete of Unit when Ingredient is deleted
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // DinnerSchedule → Dinners = Cascade delete
+            // DinnerSchedule -> Dinners
             modelBuilder.Entity<DinnerEntity>()
                 .HasOne(d => d.DinnerSchedule)
                 .WithMany(ds => ds.Dinners)
                 .HasForeignKey(d => d.DinnerScheduleId)
-                .OnDelete(DeleteBehavior.Cascade); // DinnerSchedule deleted => Dinners deleted
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Dinner → Recipe = SetNull delete
+            // Dinner -> Recipe: allow null if recipe is deleted
             modelBuilder.Entity<DinnerEntity>()
                 .HasOne(d => d.Recipe)
                 .WithMany()
                 .HasForeignKey(d => d.RecipeId)
-                .OnDelete(DeleteBehavior.SetNull); // Recipe deleted => Dinner Recipe set to null
+                .OnDelete(DeleteBehavior.SetNull); // ← detta räcker!
 
-            // Ensure there is no cascading delete conflict with Dinner -> Recipe relationship
-            modelBuilder.Entity<DinnerEntity>()
-                .HasOne(d => d.Recipe)
-                .WithMany()
-                .HasForeignKey(d => d.RecipeId)
-                .OnDelete(DeleteBehavior.NoAction); // Avoid multiple cascade paths
+            // ShoppingList -> Ingredients
+            modelBuilder.Entity<ShoppingListEntity>()
+                .HasMany(s => s.Ingredients)
+                .WithOne(i => i.ShoppingList)
+                .HasForeignKey(i => i.ShoppingListId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ShoppingListEntity>()
+                .HasOne(s => s.DinnerSchedule)
+                .WithMany(ds => ds.)
+                .HasForeignKey(s => s.DinnerScheduleId)
+                .OnDelete(DeleteBehavior.Cascade); // 👈 orsakar konflikten
 
             base.OnModelCreating(modelBuilder);
         }

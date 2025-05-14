@@ -266,7 +266,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("Dinners");
+                    b.ToTable("Dinners", (string)null);
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.DinnerScheduleEntity", b =>
@@ -297,7 +297,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("DinnerSchedules");
+                    b.ToTable("DinnerSchedules", (string)null);
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.ImageEntity", b =>
@@ -325,7 +325,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("Images");
+                    b.ToTable("Images", (string)null);
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.IngredientEntity", b =>
@@ -364,7 +364,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("UnitId");
 
-                    b.ToTable("Ingredients");
+                    b.ToTable("Ingredients", (string)null);
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.RecipeEntity", b =>
@@ -403,7 +403,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Recipes");
+                    b.ToTable("Recipes", (string)null);
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.StepEntity", b =>
@@ -431,7 +431,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("Steps");
+                    b.ToTable("Steps", (string)null);
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.UnitEntity", b =>
@@ -454,7 +454,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Units");
+                    b.ToTable("Units", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
