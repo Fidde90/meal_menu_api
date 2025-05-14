@@ -1,6 +1,5 @@
 ﻿using meal_menu_api.Database.Context;
 using meal_menu_api.Entities;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace meal_menu_api.Database.Seeders
 {

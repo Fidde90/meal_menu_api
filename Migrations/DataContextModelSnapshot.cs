@@ -264,9 +264,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("DinnerScheduleId");
 
-                    b.HasIndex("RecipeId");
-
-                    b.ToTable("Dinners", (string)null);
+                    b.ToTable("Dinners");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.DinnerScheduleEntity", b =>
@@ -297,7 +295,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("DinnerSchedules", (string)null);
+                    b.ToTable("DinnerSchedules");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.ImageEntity", b =>
@@ -325,7 +323,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("Images", (string)null);
+                    b.ToTable("Images");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.IngredientEntity", b =>
@@ -364,7 +362,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("UnitId");
 
-                    b.ToTable("Ingredients", (string)null);
+                    b.ToTable("Ingredients");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.RecipeEntity", b =>
@@ -403,7 +401,88 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Recipes", (string)null);
+                    b.ToTable("Recipes");
+                });
+
+            modelBuilder.Entity("meal_menu_api.Entities.ShoppingListEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DinnerScheduleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DinnerScheduleId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ShoppingLists");
+                });
+
+            modelBuilder.Entity("meal_menu_api.Entities.ShoppingListIngredientEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("IsChecked")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ShoppingListId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ShoppingListId");
+
+                    b.ToTable("ShoppingListIngredients");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.StepEntity", b =>
@@ -431,7 +510,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("Steps", (string)null);
+                    b.ToTable("Steps");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.UnitEntity", b =>
@@ -454,7 +533,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Units", (string)null);
+                    b.ToTable("Units");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -516,20 +595,13 @@ namespace meal_menu_api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("meal_menu_api.Entities.RecipeEntity", "Recipe")
-                        .WithMany()
-                        .HasForeignKey("RecipeId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.Navigation("DinnerSchedule");
-
-                    b.Navigation("Recipe");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.DinnerScheduleEntity", b =>
                 {
                     b.HasOne("meal_menu_api.Entities.AppUser", "User")
-                        .WithMany("Schedules")
+                        .WithMany("DinnerSchedules")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -557,9 +629,9 @@ namespace meal_menu_api.Migrations
                         .IsRequired();
 
                     b.HasOne("meal_menu_api.Entities.UnitEntity", "Unit")
-                        .WithMany()
+                        .WithMany("Ingredients")
                         .HasForeignKey("UnitId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Recipe");
@@ -578,6 +650,36 @@ namespace meal_menu_api.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("meal_menu_api.Entities.ShoppingListEntity", b =>
+                {
+                    b.HasOne("meal_menu_api.Entities.DinnerScheduleEntity", "DinnerSchedule")
+                        .WithOne("ShoppingList")
+                        .HasForeignKey("meal_menu_api.Entities.ShoppingListEntity", "DinnerScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("meal_menu_api.Entities.AppUser", "User")
+                        .WithMany("ShoppingLists")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DinnerSchedule");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("meal_menu_api.Entities.ShoppingListIngredientEntity", b =>
+                {
+                    b.HasOne("meal_menu_api.Entities.ShoppingListEntity", "ShoppingList")
+                        .WithMany("Ingredients")
+                        .HasForeignKey("ShoppingListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ShoppingList");
+                });
+
             modelBuilder.Entity("meal_menu_api.Entities.StepEntity", b =>
                 {
                     b.HasOne("meal_menu_api.Entities.RecipeEntity", "Recipe")
@@ -591,14 +693,18 @@ namespace meal_menu_api.Migrations
 
             modelBuilder.Entity("meal_menu_api.Entities.AppUser", b =>
                 {
+                    b.Navigation("DinnerSchedules");
+
                     b.Navigation("Recipes");
 
-                    b.Navigation("Schedules");
+                    b.Navigation("ShoppingLists");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.DinnerScheduleEntity", b =>
                 {
                     b.Navigation("Dinners");
+
+                    b.Navigation("ShoppingList");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.RecipeEntity", b =>
@@ -608,6 +714,16 @@ namespace meal_menu_api.Migrations
                     b.Navigation("Ingredients");
 
                     b.Navigation("Steps");
+                });
+
+            modelBuilder.Entity("meal_menu_api.Entities.ShoppingListEntity", b =>
+                {
+                    b.Navigation("Ingredients");
+                });
+
+            modelBuilder.Entity("meal_menu_api.Entities.UnitEntity", b =>
+                {
+                    b.Navigation("Ingredients");
                 });
 #pragma warning restore 612, 618
         }
