@@ -1,4 +1,4 @@
-﻿namespace meal_menu_api.Models
+﻿namespace meal_menu_api.Models.Enums
 {
     public enum ShoppingListStatus
     {

@@ -3,6 +3,7 @@ using meal_menu_api.Dtos;
 using meal_menu_api.Entities;
 using meal_menu_api.Filters;
 using meal_menu_api.Models;
+using meal_menu_api.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

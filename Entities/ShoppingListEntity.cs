@@ -1,4 +1,4 @@
-﻿using meal_menu_api.Models;
+﻿using meal_menu_api.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

@@ -1,7 +1,4 @@
-﻿using meal_menu_api.Entities;
-using meal_menu_api.Models;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using meal_menu_api.Models.Enums;
 
 namespace meal_menu_api.Dtos
 {
@@ -15,7 +12,7 @@ namespace meal_menu_api.Dtos
 
         public ShoppingListStatus Status { get; set; }
 
-        public List<ShoppingListIngredientDto> Ingredients { get; set; } = new();
+        public List<ShoppingListIngredientDto> Ingredients { get; set; } = [];
 
         public DateTime CreatedAt { get; set; }
 

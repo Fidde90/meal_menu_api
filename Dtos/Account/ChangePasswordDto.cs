@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace meal_menu_api.Dtos
+namespace meal_menu_api.Dtos.Account
 {
     public class ChangePasswordDto
     {

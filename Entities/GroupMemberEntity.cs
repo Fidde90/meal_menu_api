@@ -1,4 +1,6 @@
 ﻿
+using meal_menu_api.Models.Enums;
+
 namespace meal_menu_api.Entities
 {
     public class GroupMemberEntity
@@ -10,7 +12,7 @@ namespace meal_menu_api.Entities
 
         public AppUser User { get; set; } = default!;
 
-        public string Role { get; set; } = null!;
+        public GroupRole Role { get; set; }
 
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
     }

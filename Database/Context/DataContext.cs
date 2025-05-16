@@ -1,6 +1,8 @@
 ﻿using meal_menu_api.Entities;
+using meal_menu_api.Models.Enums;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Reflection;
 
 namespace meal_menu_api.Database.Context
@@ -33,6 +35,15 @@ namespace meal_menu_api.Database.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            var converter = new ValueConverter<GroupRole, string>(
+                v => v.ToString(),    // Från enum till string (vid sparande)
+                v => (GroupRole)Enum.Parse(typeof(GroupRole), v) // Från string till enum (vid läsning)
+            );
+
+            modelBuilder.Entity<GroupMemberEntity>()
+                .Property(e => e.Role)
+                .HasConversion(converter);
+
 
             // USER → RECIPES
             modelBuilder.Entity<AppUser>()

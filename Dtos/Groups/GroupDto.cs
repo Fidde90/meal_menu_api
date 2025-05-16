@@ -1,12 +1,12 @@
 ﻿using meal_menu_api.Entities;
 
-namespace meal_menu_api.Dtos
+namespace meal_menu_api.Dtos.Groups
 {
     public class GroupDto
     {
         public int Id { get; set; }
 
-        public string OwnerId { get; set; } = null!;
+        public GroupOwnerDto Owner { get; set; } = null!;
 
         public string Name { get; set; } = null!;
 
@@ -14,7 +14,7 @@ namespace meal_menu_api.Dtos
 
         public string? IconUrl { get; set; }
 
-        public ICollection<GroupMemberEntity> Members { get; set; } = [];
+        public List<GroupMemberDto> Members { get; set; } = [];
 
         public DateTime CreatedAt { get; set; }
 
