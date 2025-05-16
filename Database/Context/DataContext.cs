@@ -93,6 +93,23 @@ namespace meal_menu_api.Database.Context
                 .HasForeignKey(sli => sli.ShoppingListId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+
+            // KOPPLINGSTABELL FÖR ANVÄNDARE OCH GRUPPER
+            modelBuilder.Entity<GroupMemberEntity>()
+                .HasKey(gm => new { gm.GroupId, gm.UserId });
+
+            modelBuilder.Entity<GroupMemberEntity>()
+                .HasOne(gm => gm.Group)
+                .WithMany(g => g.Members)
+                .HasForeignKey(gm => gm.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<GroupMemberEntity>()
+                .HasOne(gm => gm.User)
+                .WithMany(u => u.GroupMemberships)
+                .HasForeignKey(gm => gm.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             base.OnModelCreating(modelBuilder);
         }
     }
