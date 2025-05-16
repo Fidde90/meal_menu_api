@@ -13,7 +13,7 @@ namespace meal_menu_api.Entities
 
         public string? Description { get; set; }
 
-        public IFormFile? Icon { get; set; }
+        public string? IconUrl { get; set; }
 
         public ICollection<GroupMemberEntity> Members { get; set; } = [];
 

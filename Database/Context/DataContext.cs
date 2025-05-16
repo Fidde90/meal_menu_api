@@ -26,6 +26,10 @@ namespace meal_menu_api.Database.Context
 
         public DbSet<ShoppingListIngredientEntity> ShoppingListIngredients { get; set; }
 
+        public DbSet<GroupEntity> Groups { get; set; }
+
+        public DbSet<GroupMemberEntity> GroupMembers { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
