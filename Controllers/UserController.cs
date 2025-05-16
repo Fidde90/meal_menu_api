@@ -18,6 +18,7 @@ namespace meal_menu_api.Controllers
             _userManager = userManager;
         }
 
+        [HttpGet]
         [Route("get")]
         [UseApiKey]
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -31,6 +32,7 @@ namespace meal_menu_api.Controllers
             return NotFound();
         }
 
+        [HttpPut]
         [Route("update")]
         [UseApiKey]
         [Authorize(AuthenticationSchemes = "Bearer")]

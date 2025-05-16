@@ -129,7 +129,6 @@ namespace meal_menu_api.Controllers
         }
 
         [HttpPost("delete")]
-        [Route("delete")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> DeleteAccount(DeleteAccountDto deleteAccountdto)
         {
