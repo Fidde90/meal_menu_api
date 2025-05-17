@@ -139,5 +139,20 @@ namespace meal_menu_api.Controllers
             await Image.CopyToAsync(stream);
             return filePath;
         }
+
+        [HttpDelete]
+        [Route("delete/{id}")]
+        public async Task<IActionResult> DeleteGroup(string id)
+        {
+            var group = _dataContext.Groups.FirstOrDefault(g => g.Id.ToString() == id);
+
+            if (group == null)
+                return NotFound("group not found");
+
+            _dataContext.Groups.Remove(group);
+            await _dataContext.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }
