@@ -3,7 +3,6 @@ using meal_menu_api.Models.Enums;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System.Reflection;
 
 namespace meal_menu_api.Database.Context
 {
@@ -31,6 +30,8 @@ namespace meal_menu_api.Database.Context
         public DbSet<GroupEntity> Groups { get; set; }
 
         public DbSet<GroupMemberEntity> GroupMembers { get; set; }
+
+        public DbSet<GroupInvitationEntity> GroupInvitations { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -124,6 +125,25 @@ namespace meal_menu_api.Database.Context
                 .WithMany(u => u.GroupMemberships)
                 .HasForeignKey(gm => gm.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+
+            //INBJUDNINGAR
+            modelBuilder.Entity<GroupInvitationEntity>()
+                .HasOne(i => i.Group)
+                .WithMany(g => g.Invitations)
+                .HasForeignKey(i => i.GroupId);
+
+            modelBuilder.Entity<GroupInvitationEntity>()
+                .HasOne(i => i.InvitedUser)
+                .WithMany()
+                .HasForeignKey(i => i.InvitedUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<GroupInvitationEntity>()
+                .HasOne(i => i.InvitedByUser)
+                .WithMany()
+                .HasForeignKey(i => i.InvitedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             base.OnModelCreating(modelBuilder);
         }

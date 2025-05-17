@@ -1,12 +1,9 @@
-﻿using meal_menu_api.Entities;
-
+﻿
 namespace meal_menu_api.Dtos.Groups
 {
     public class GroupDto
     {
         public int Id { get; set; }
-
-        public GroupOwnerDto Owner { get; set; } = null!;
 
         public string Name { get; set; } = null!;
 
@@ -15,6 +12,8 @@ namespace meal_menu_api.Dtos.Groups
         public string? IconUrl { get; set; }
 
         public List<GroupMemberDto> Members { get; set; } = [];
+
+        public List<GroupInvitationDto> Invites { get; set; } = [];
 
         public DateTime CreatedAt { get; set; }
 

@@ -21,5 +21,7 @@ namespace meal_menu_api.Entities
 
         public DateTime UpdatedAt { get; set; }
 
+        public ICollection<GroupInvitationEntity> Invitations { get; set; } = [];
+
     }
 }

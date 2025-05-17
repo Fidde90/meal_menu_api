@@ -17,7 +17,13 @@ namespace meal_menu_api
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+              .AddJsonOptions(options =>
+               {
+                   //för att converta enums automatiskt till sin strängvariant
+                   options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+               });
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -89,7 +95,6 @@ namespace meal_menu_api
                     x.SwaggerEndpoint("/swagger/v1/swagger.json", "Meal menu v1");
                 });
             }
-
 
             // Configure the HTTP request pipeline
             app.UseCors("Meal_menu_client");

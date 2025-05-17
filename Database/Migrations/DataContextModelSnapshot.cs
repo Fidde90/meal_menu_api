@@ -264,7 +264,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("DinnerScheduleId");
 
-                    b.ToTable("Dinners", (string)null);
+                    b.ToTable("Dinners");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.DinnerScheduleEntity", b =>
@@ -295,7 +295,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("DinnerSchedules", (string)null);
+                    b.ToTable("DinnerSchedules");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.GroupEntity", b =>
@@ -328,7 +328,52 @@ namespace meal_menu_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Groups", (string)null);
+                    b.ToTable("Groups");
+                });
+
+            modelBuilder.Entity("meal_menu_api.Entities.GroupInvitationEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("InvitedByUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("InvitedUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RespondedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("InvitedByUserId");
+
+                    b.HasIndex("InvitedUserId");
+
+                    b.ToTable("GroupInvitations");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.GroupMemberEntity", b =>
@@ -350,7 +395,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("GroupMembers", (string)null);
+                    b.ToTable("GroupMembers");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.ImageEntity", b =>
@@ -378,7 +423,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("Images", (string)null);
+                    b.ToTable("Images");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.IngredientEntity", b =>
@@ -417,7 +462,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("UnitId");
 
-                    b.ToTable("Ingredients", (string)null);
+                    b.ToTable("Ingredients");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.RecipeEntity", b =>
@@ -456,7 +501,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Recipes", (string)null);
+                    b.ToTable("Recipes");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.ShoppingListEntity", b =>
@@ -496,7 +541,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ShoppingLists", (string)null);
+                    b.ToTable("ShoppingLists");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.ShoppingListIngredientEntity", b =>
@@ -537,7 +582,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("ShoppingListId");
 
-                    b.ToTable("ShoppingListIngredients", (string)null);
+                    b.ToTable("ShoppingListIngredients");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.StepEntity", b =>
@@ -565,7 +610,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.ToTable("Steps", (string)null);
+                    b.ToTable("Steps");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.UnitEntity", b =>
@@ -588,7 +633,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Units", (string)null);
+                    b.ToTable("Units");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -662,6 +707,33 @@ namespace meal_menu_api.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("meal_menu_api.Entities.GroupInvitationEntity", b =>
+                {
+                    b.HasOne("meal_menu_api.Entities.GroupEntity", "Group")
+                        .WithMany("Invitations")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("meal_menu_api.Entities.AppUser", "InvitedByUser")
+                        .WithMany()
+                        .HasForeignKey("InvitedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("meal_menu_api.Entities.AppUser", "InvitedUser")
+                        .WithMany()
+                        .HasForeignKey("InvitedUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+
+                    b.Navigation("InvitedByUser");
+
+                    b.Navigation("InvitedUser");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.GroupMemberEntity", b =>
@@ -785,6 +857,8 @@ namespace meal_menu_api.Migrations
 
             modelBuilder.Entity("meal_menu_api.Entities.GroupEntity", b =>
                 {
+                    b.Navigation("Invitations");
+
                     b.Navigation("Members");
                 });
 

@@ -8,7 +8,6 @@ using meal_menu_api.Models.Forms;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using System.ComponentModel;
 
 namespace meal_menu_api.Controllers
@@ -72,6 +71,91 @@ namespace meal_menu_api.Controllers
         }
 
         [HttpGet]
+        [Route("get/{id}")]
+        public async Task<IActionResult> GetGroup(string id)
+        {
+            if (!string.IsNullOrEmpty(id))
+            {
+                var group = _dataContext.Groups
+                                .Include(g => g.Invitations)
+                                    .ThenInclude(i => i.InvitedUser)
+                                .Include(g => g.Members)
+                                    .ThenInclude(m => m.User)
+                                .FirstOrDefault(g => g.Id.ToString() == id);
+
+                if (group == null)
+                    return NotFound();
+
+                var groupDto = new GroupDto
+                {
+                    Id = group.Id,
+                    Name = group.Name,
+                    Description = group.Description,
+                    IconUrl = group.IconUrl,
+                    CreatedAt = group.CreatedAt,
+                    UpdatedAt = group.UpdatedAt,
+                };
+
+                List<GroupMemberDto> menbers = [];
+                foreach (var member in group.Members)
+                {
+                    var memberDto = new GroupMemberDto
+                    {
+                        FirstName = member.User.FirstName,
+                        LastName = member.User.LastName,
+                        Email = member.User.Email ?? "",
+                        UserName = member.User.UserName ?? "",
+                        Role = member.Role.ToString(),
+                        JoinedAt = member.JoinedAt,
+                        LastLogin = member.User.LastLogin
+                    };
+
+                    menbers.Add(memberDto);
+                }
+
+                groupDto.Members = menbers;
+
+                List<GroupInvitationDto> invites = [];
+                foreach (var invitation in group.Invitations.Where(i => i.Status == InvitationStatus.Pending))
+                {
+                    var invitationDto = new GroupInvitationDto
+                    {
+                        InvitedByUser = new InvitedByUserDto 
+                        { 
+                            FirstName = invitation.InvitedByUser.FirstName,
+                            LastName= invitation.InvitedByUser.LastName,
+                            Email = invitation.InvitedByUser.Email ?? "",
+                            UserName = invitation.InvitedByUser.UserName ?? ""
+                        },
+
+                        InvitedUser = new InvitedUserDto 
+                        { 
+                            FirstName = invitation.InvitedUser.FirstName,
+                            LastName = invitation.InvitedUser.LastName,
+                            Email = invitation.InvitedUser.Email ?? "",
+                            UserName = invitation.InvitedUser.UserName ?? "",
+                            status = invitation.Status.ToString().ToLower()
+                        },
+
+                        Message = invitation.Message,
+                        SentAt = invitation.SentAt,
+                        Status = invitation.Status,
+                        CreatedAt = invitation.CreatedAt
+                    };
+
+                    invites.Add(invitationDto);
+                }
+
+                groupDto.Invites = invites;
+
+
+                return Ok(groupDto);
+            }
+
+            return BadRequest();
+        }
+
+        [HttpGet]
         [Route("get")]
         public async Task<IActionResult> GetAllGroups()
         {
@@ -86,8 +170,7 @@ namespace meal_menu_api.Controllers
             UserGroupsDto groups = new();
 
             foreach (var group in groupsMember)
-            {
-                var ownerEntity = _dataContext.Users.FirstOrDefault(u => u.Id == group.Group.OwnerId);
+            {          
                 List<GroupMemberDto> members = [];
 
                 foreach (var member in group.Group.Members)
@@ -103,22 +186,11 @@ namespace meal_menu_api.Controllers
                         LastLogin = member.User.LastLogin
                     });
                 }
-                var enumConvert = new EnumConverter(typeof(GroupRole));
-                var owner = new GroupOwnerDto
-                {
-                    FirstName = ownerEntity?.FirstName,
-                    LastName = ownerEntity?.LastName,
-                    Email = ownerEntity?.Email,
-                    UserName = ownerEntity?.UserName,
-                    Role = GroupRole.GroupOwner.ToString(),
-                    LastLogin = ownerEntity?.LastLogin,
-                };
 
                 groups.Groups.Add(
                     new GroupDto
                     {
                         Id = group.Group.Id,
-                        Owner = owner,
                         Name = group.Group.Name,
                         Description = group.Group.Description,
                         IconUrl = group.Group.IconUrl,
@@ -132,27 +204,33 @@ namespace meal_menu_api.Controllers
             return Ok(groups);
         }
 
+        [HttpDelete]
+        [Route("delete/{id}")]
+        public async Task<IActionResult> DeleteGroup(string id)
+        {
+            if (!string.IsNullOrEmpty(id))
+            {
+                var group = _dataContext.Groups.FirstOrDefault(g => g.Id.ToString() == id);
+
+                if (group == null)
+                    return NotFound("group not found");
+
+                _dataContext.Groups.Remove(group);
+                await _dataContext.SaveChangesAsync();
+
+                return NoContent();
+            }
+
+            return BadRequest();
+        }
+
+
         public async Task<string> SaveImage(IFormFile Image, int id)
         {
             string filePath = Path.Combine("Images/groups", $"{id.ToString()}_" + Image.FileName);
             using var stream = new FileStream(filePath, FileMode.Create);
             await Image.CopyToAsync(stream);
             return filePath;
-        }
-
-        [HttpDelete]
-        [Route("delete/{id}")]
-        public async Task<IActionResult> DeleteGroup(string id)
-        {
-            var group = _dataContext.Groups.FirstOrDefault(g => g.Id.ToString() == id);
-
-            if (group == null)
-                return NotFound("group not found");
-
-            _dataContext.Groups.Remove(group);
-            await _dataContext.SaveChangesAsync();
-
-            return NoContent();
         }
     }
 }
