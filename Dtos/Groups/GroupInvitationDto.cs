@@ -4,9 +4,11 @@ namespace meal_menu_api.Dtos.Groups
 {
     public class GroupInvitationDto
     {
+        public string? InvitationId { get; set; }
+
         public InvitedByUserDto InvitedByUser { get; set; } = null!;
 
-        public InvitedUserDto InvitedUser { get; set; } = null!;
+        public InvitedUserDto? InvitedUser { get; set; }
 
         public string? Message { get; set; }
 

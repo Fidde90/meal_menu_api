@@ -76,12 +76,12 @@ namespace meal_menu_api.Controllers
         {
             if (!string.IsNullOrEmpty(id))
             {
-                var group = _dataContext.Groups
+                var group = await _dataContext.Groups
                                 .Include(g => g.Invitations)
                                     .ThenInclude(i => i.InvitedUser)
                                 .Include(g => g.Members)
                                     .ThenInclude(m => m.User)
-                                .FirstOrDefault(g => g.Id.ToString() == id);
+                                .FirstOrDefaultAsync(g => g.Id.ToString() == id);
 
                 if (group == null)
                     return NotFound();
