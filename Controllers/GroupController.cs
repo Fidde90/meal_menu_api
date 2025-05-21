@@ -3,6 +3,7 @@ using meal_menu_api.Dtos;
 using meal_menu_api.Dtos.Groups;
 using meal_menu_api.Entities;
 using meal_menu_api.Filters;
+using meal_menu_api.Managers;
 using meal_menu_api.Models.Enums;
 using meal_menu_api.Models.Forms;
 using Microsoft.AspNetCore.Authorization;
@@ -19,10 +20,12 @@ namespace meal_menu_api.Controllers
     public class GroupController : ControllerBase
     {
         private readonly DataContext _dataContext;
+        private readonly ImageManager _imageManager;
 
-        public GroupController(DataContext dataContext)
+        public GroupController(DataContext dataContext, ImageManager imageManager)
         {
             _dataContext = dataContext;
+            _imageManager = imageManager;
         }
 
         [HttpPost]
@@ -51,7 +54,7 @@ namespace meal_menu_api.Controllers
 
             if (model.Icon != null)
             {
-                string imageUrl = await SaveImage(model.Icon, newGroup.Id);
+                string imageUrl = await _imageManager.SaveImage(model.Icon, newGroup.Id);
                 newGroup.IconUrl = imageUrl;
             }
 
@@ -85,6 +88,8 @@ namespace meal_menu_api.Controllers
 
                 if (group == null)
                     return NotFound();
+
+          
 
                 var groupDto = new GroupDto
                 {
@@ -204,6 +209,42 @@ namespace meal_menu_api.Controllers
             return Ok(groups);
         }
 
+        [HttpPut]
+        [Route("update")]
+        public async Task<IActionResult> UpdateGroup(UpdateGroupFormModel model)
+        {
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var existingGroup = await _dataContext.Groups.FirstOrDefaultAsync(g => g.Id.ToString() == model.GroupId);
+
+            if (existingGroup == null)
+                return NotFound();
+
+            existingGroup.Name = model.Name;
+            existingGroup.Description = model.Description;
+            existingGroup.UpdatedAt = DateTime.Now;
+   
+
+            if (model.DeleteIcon && model.Icon == null)
+            {
+                var deletedImage = await _imageManager.DeleteGroupImage(existingGroup.Id);
+                var newImageUrl = await _imageManager.SaveImage(model.Icon!, Convert.ToInt32(model.GroupId));
+                existingGroup.IconUrl = newImageUrl.Replace("\\", "/");
+            }
+
+            if(!model.DeleteIcon && model.Icon != null)
+            {
+                var deletedImage = await _imageManager.DeleteGroupImage(existingGroup.Id);
+                var newImageUrl = await _imageManager.SaveImage(model.Icon!, Convert.ToInt32(model.GroupId));
+                existingGroup.IconUrl = newImageUrl.Replace("\\", "/");
+            }
+          
+            await _dataContext.SaveChangesAsync();
+
+            return Ok(existingGroup);
+        }
+
         [HttpDelete]
         [Route("delete/{id}")]
         public async Task<IActionResult> DeleteGroup(string id)
@@ -222,15 +263,6 @@ namespace meal_menu_api.Controllers
             }
 
             return BadRequest();
-        }
-
-
-        public async Task<string> SaveImage(IFormFile Image, int id)
-        {
-            string filePath = Path.Combine("Images/groups", $"{id.ToString()}_" + Image.FileName);
-            using var stream = new FileStream(filePath, FileMode.Create);
-            await Image.CopyToAsync(stream);
-            return filePath;
-        }
+        } 
     }
 }

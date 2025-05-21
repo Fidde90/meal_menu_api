@@ -117,8 +117,6 @@ namespace meal_menu_api.Controllers
 
             List<ShoppingListIngredientDto> returnList = ConvertIngredientVolumes(list);
 
-
-
             return Ok(returnList);
         }
 
