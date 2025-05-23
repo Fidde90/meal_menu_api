@@ -1,7 +1,8 @@
 ﻿using meal_menu_api.Entities;
+using meal_menu_api.Models.Enums;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace meal_menu_api.Database.Context
 {
@@ -22,64 +23,127 @@ namespace meal_menu_api.Database.Context
 
         public DbSet<DinnerEntity> Dinners { get; set; }
 
+        public DbSet<ShoppingListEntity> ShoppingLists { get; set; }
+
+        public DbSet<ShoppingListIngredientEntity> ShoppingListIngredients { get; set; }
+
+        public DbSet<GroupEntity> Groups { get; set; }
+
+        public DbSet<GroupMemberEntity> GroupMembers { get; set; }
+
+        public DbSet<GroupInvitationEntity> GroupInvitations { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-            // Recipes -> Users: Delete Recipes when User is deleted
-            modelBuilder.Entity<RecipeEntity>()
-                .HasOne(r => r.User)
-                .WithMany(u => u.Recipes)
+            var converter = new ValueConverter<GroupRole, string>(
+                v => v.ToString(),    // Från enum till string (vid sparande)
+                v => (GroupRole)Enum.Parse(typeof(GroupRole), v) // Från string till enum (vid läsning)
+            );
+
+            modelBuilder.Entity<GroupMemberEntity>()
+                .Property(e => e.Role)
+                .HasConversion(converter);
+
+
+            // USER → RECIPES
+            modelBuilder.Entity<AppUser>()
+                .HasMany(u => u.Recipes)
+                .WithOne(r => r.User)
                 .HasForeignKey(r => r.UserId)
-                .OnDelete(DeleteBehavior.Cascade); // User deleted => Recipes deleted
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Recipe -> Ingredients: Delete Ingredients when Recipe is deleted
-            modelBuilder.Entity<IngredientEntity>()
-                .HasOne(i => i.Recipe)
-                .WithMany(r => r.Ingredients)
+            // USER → DINNER SCHEDULES
+            modelBuilder.Entity<AppUser>()
+                .HasMany(u => u.DinnerSchedules)
+                .WithOne(ds => ds.User)
+                .HasForeignKey(ds => ds.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // USER → SHOPPING LISTS
+            modelBuilder.Entity<AppUser>()
+                .HasMany(u => u.ShoppingLists)
+                .WithOne(sl => sl.User)
+                .HasForeignKey(sl => sl.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // RECIPE → INGREDIENTS
+            modelBuilder.Entity<RecipeEntity>()
+                .HasMany(r => r.Ingredients)
+                .WithOne(i => i.Recipe)
                 .HasForeignKey(i => i.RecipeId)
-                .OnDelete(DeleteBehavior.Cascade); // Recipe deleted => Ingredients deleted
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Recipe -> Steps: Delete Steps when Recipe is deleted
-            modelBuilder.Entity<StepEntity>()
-                .HasOne(s => s.Recipe)
-                .WithMany(r => r.Steps)
-                .HasForeignKey(s => s.RecipeId)
-                .OnDelete(DeleteBehavior.Cascade); // Recipe deleted => Steps deleted
-
-            // Recipe -> Images: Delete Images when Recipe is deleted
-            modelBuilder.Entity<ImageEntity>()
-                .HasOne(img => img.Recipe)
-                .WithMany(r => r.Images)
+            // RECIPE → IMAGES
+            modelBuilder.Entity<RecipeEntity>()
+                .HasMany(r => r.Images)
+                .WithOne(img => img.Recipe)
                 .HasForeignKey(img => img.RecipeId)
-                .OnDelete(DeleteBehavior.Cascade); // Recipe deleted => Images deleted
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Ingredient -> Unit (DO NOT cascade delete here!)
-            modelBuilder.Entity<IngredientEntity>()
-                .HasOne(i => i.Unit)
-                .WithMany()
-                .HasForeignKey(i => i.UnitId)
-                .OnDelete(DeleteBehavior.Restrict); // Restrict delete of Unit when Ingredient is deleted
+            // RECIPE → STEPS
+            modelBuilder.Entity<RecipeEntity>()
+                .HasMany(r => r.Steps)
+                .WithOne(s => s.Recipe)
+                .HasForeignKey(s => s.RecipeId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // DinnerSchedule → Dinners = Cascade delete
-            modelBuilder.Entity<DinnerEntity>()
-                .HasOne(d => d.DinnerSchedule)
-                .WithMany(ds => ds.Dinners)
+            // DINNER SCHEDULE → DINNER ENTITIES
+            modelBuilder.Entity<DinnerScheduleEntity>()
+                .HasMany(ds => ds.Dinners)
+                .WithOne(d => d.DinnerSchedule)
                 .HasForeignKey(d => d.DinnerScheduleId)
-                .OnDelete(DeleteBehavior.Cascade); // DinnerSchedule deleted => Dinners deleted
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Dinner → Recipe = SetNull delete
-            modelBuilder.Entity<DinnerEntity>()
-                .HasOne(d => d.Recipe)
-                .WithMany()
-                .HasForeignKey(d => d.RecipeId)
-                .OnDelete(DeleteBehavior.SetNull); // Recipe deleted => Dinner Recipe set to null
+            // DINNER SCHEDULE → SHOPPING LIST (en-till-en)
+            modelBuilder.Entity<DinnerScheduleEntity>()
+                .HasOne(ds => ds.ShoppingList)
+                .WithOne(sl => sl.DinnerSchedule)
+                .HasForeignKey<ShoppingListEntity>(sl => sl.DinnerScheduleId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            // Ensure there is no cascading delete conflict with Dinner -> Recipe relationship
-            modelBuilder.Entity<DinnerEntity>()
-                .HasOne(d => d.Recipe)
+            // SHOPPING LIST → SHOPPING LIST INGREDIENTS
+            modelBuilder.Entity<ShoppingListEntity>()
+                .HasMany(sl => sl.Ingredients)
+                .WithOne(sli => sli.ShoppingList)
+                .HasForeignKey(sli => sli.ShoppingListId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            // KOPPLINGSTABELL FÖR ANVÄNDARE OCH GRUPPER
+            modelBuilder.Entity<GroupMemberEntity>()
+                .HasKey(gm => new { gm.GroupId, gm.UserId });
+
+            modelBuilder.Entity<GroupMemberEntity>()
+                .HasOne(gm => gm.Group)
+                .WithMany(g => g.Members)
+                .HasForeignKey(gm => gm.GroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<GroupMemberEntity>()
+                .HasOne(gm => gm.User)
+                .WithMany(u => u.GroupMemberships)
+                .HasForeignKey(gm => gm.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            //INBJUDNINGAR
+            modelBuilder.Entity<GroupInvitationEntity>()
+                .HasOne(i => i.Group)
+                .WithMany(g => g.Invitations)
+                .HasForeignKey(i => i.GroupId);
+
+            modelBuilder.Entity<GroupInvitationEntity>()
+                .HasOne(i => i.InvitedUser)
                 .WithMany()
-                .HasForeignKey(d => d.RecipeId)
-                .OnDelete(DeleteBehavior.NoAction); // Avoid multiple cascade paths
+                .HasForeignKey(i => i.InvitedUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<GroupInvitationEntity>()
+                .HasOne(i => i.InvitedByUser)
+                .WithMany()
+                .HasForeignKey(i => i.InvitedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             base.OnModelCreating(modelBuilder);
         }

@@ -1,10 +1,12 @@
 ﻿using meal_menu_api.Database.Context;
 using meal_menu_api.Dtos;
+using meal_menu_api.Dtos.Account;
 using meal_menu_api.Entities;
 using meal_menu_api.Managers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace meal_menu_api.Controllers
 {
@@ -129,7 +131,6 @@ namespace meal_menu_api.Controllers
         }
 
         [HttpPost("delete")]
-        [Route("delete")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> DeleteAccount(DeleteAccountDto deleteAccountdto)
         {
@@ -144,13 +145,19 @@ namespace meal_menu_api.Controllers
             if (!await _userManager.CheckPasswordAsync(user, deleteAccountdto.Password))
                 return Unauthorized();
 
+            var invitations = await _dataContext.GroupInvitations
+                                .Where(i => i.InvitedUserId == user.Id || i.InvitedByUserId == user.Id)
+                                .ToListAsync();
+
+            _dataContext.GroupInvitations.RemoveRange(invitations);
+            await _dataContext.SaveChangesAsync();
+
             var deleted = await _userManager.DeleteAsync(user);
 
             if (deleted.Succeeded)
-                return NoContent();
+                return Ok();
 
             return BadRequest(new { message = "Failed to delete user" });
-
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using meal_menu_api.Dtos;
+﻿using meal_menu_api.Dtos.Account;
 using meal_menu_api.Entities;
 using meal_menu_api.Filters;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +18,7 @@ namespace meal_menu_api.Controllers
             _userManager = userManager;
         }
 
+        [HttpGet]
         [Route("get")]
         [UseApiKey]
         [Authorize(AuthenticationSchemes = "Bearer")]
@@ -31,6 +32,7 @@ namespace meal_menu_api.Controllers
             return NotFound();
         }
 
+        [HttpPut]
         [Route("update")]
         [UseApiKey]
         [Authorize(AuthenticationSchemes = "Bearer")]

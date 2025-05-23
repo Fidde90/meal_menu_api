@@ -27,25 +27,47 @@ namespace meal_menu_api.Controllers
             if (user == null)
                 return NotFound("User not found");
 
-            List<RecipeEntity> recipes = _dataContext.Recipes.Where(u => u.UserId == user!.Id).Include(r => r.Images)
-                .OrderBy(r => r.RotationPoints).ToList();
+            List<RecipeEntity> recipes = _dataContext.Recipes
+                .Where(r => r.UserId == user.Id)
+                .Include(r => r.Images)
+                .OrderBy(r => r.RotationPoints)
+                .ToList();
 
-            if (recipes.Count < 7)
-                return BadRequest("a minimum of 7 recipes required for a dinner schedule");
+            if (recipes.Count < 1)
+                return BadRequest("You must have at least 1 recipe to create a dinner schedule.");
 
-            List<RecipeEntity> recipesToShuffle= recipes.Take(10).ToList();
-            List<RecipeEntity> selectedRecipes = _toolBox.ShuffleArray(recipesToShuffle).Take(7).ToList();
+            // Välj upp till 10 recept med lägst poäng
+            List<RecipeEntity> recipesToShuffle = recipes.Take(Math.Min(recipes.Count, 10)).ToList();
 
-            for (int i = 0; i < selectedRecipes.Count; i++)
+            // Slumpa recepten
+            List<RecipeEntity> shuffled = _toolBox.ShuffleArray(recipesToShuffle).ToList();
+
+            // Fyll upp till exakt 7 recept – även om det kräver duplicering
+            List<RecipeEntity> selectedRecipes = [];
+
+            while (selectedRecipes.Count < 7)
             {
-                selectedRecipes[i].RotationPoints += 25;
-
-                if (selectedRecipes[i].RotationPoints >= 100)
-                    selectedRecipes[i].RotationPoints = 0;
+                foreach (var recipe in shuffled)
+                {
+                    selectedRecipes.Add(recipe);
+                    if (selectedRecipes.Count == 7)
+                        break;
+                }
             }
 
+            // Uppdatera poängen för valda recept
+            foreach (var recipe in selectedRecipes)
+            {
+                recipe.RotationPoints += 25;
+                if (recipe.RotationPoints >= 100)
+                    recipe.RotationPoints = 0;
+            }
+
+            // Uppdatera poängen för övriga recept
             foreach (var recipe in recipes.Except(selectedRecipes))
+            {
                 recipe.RotationPoints = Math.Min(recipe.RotationPoints + 25, 100);
+            }
 
             await _dataContext.SaveChangesAsync();
 

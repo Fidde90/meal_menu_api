@@ -10,6 +10,7 @@ namespace meal_menu_api.Config
         {
             services.AddScoped<AuthManager>();
             services.AddScoped<RecipeManager>();
+            services.AddScoped<ImageManager>();
             services.AddScoped<ToolBox>();
         }
     }

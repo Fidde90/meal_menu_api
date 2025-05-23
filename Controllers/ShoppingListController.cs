@@ -46,21 +46,11 @@ namespace meal_menu_api.Controllers
                 .Include(i => i.Unit)
                 .ToListAsync();
 
-            //var shoppingList = new ShoppingListEntity
-            //{
-            //    User = user!,
-            //    UserId = user!.Id,
-            //    DinnerScheduleId = dinnerSchedule.Id,
-            //    DinnerSchedule = dinnerSchedule,
-            //    Name = "shoppinglistan som luktar skit",
-            //    Notes = "det stinker här",
-            //    Status = ShoppingListStatus.Active,
-            //    CreatedAt = DateTime.Now,
-            //    UpdatedAt = DateTime.Now
-            //};
 
             //_dataContext.ShoppingLists.Add(shoppingList);
+            _dataContext.ShoppingLists.Add(shoppingList);
 
+            await _dataContext.SaveChangesAsync();
             //await _dataContext.SaveChangesAsync();
 
 

@@ -1,6 +1,5 @@
 ﻿using meal_menu_api.Database.Context;
 using meal_menu_api.Entities;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace meal_menu_api.Database.Seeders
 {
@@ -13,7 +12,7 @@ namespace meal_menu_api.Database.Seeders
                 if (!context.Units.Any())
                 {
                     // 1. Units
-                    var newUnits = new List<string> { "krm", "tsk", "msk", "cl", "ml", "dl", "l", "g", "hg", "kg", "nypa", "paket", "st"," " };
+                    var newUnits = new List<string> { "krm", "tsk", "msk", "cl", "ml", "dl", "l", "g", "hg", "kg", "nypa", "förp", "st", " " };
                     foreach (var unitName in newUnits)
                     {
                         if (!context.Units.Any(u => u.Name == unitName))
@@ -64,72 +63,73 @@ namespace meal_menu_api.Database.Seeders
                     }
 
                     context.SaveChanges();
-                          
+
                     var units = context.Units.ToDictionary(u => u.Name, u => u.Id);
                     var recipes = context.Recipes.ToDictionary(r => r.Name, r => r.Id);
 
                     // 4. Ingredients
                     var ingredients = new List<IngredientEntity>
                     {
-                        new() { UnitId = units["g"], RecipeId = recipes["Lammgryta med kikärtor"], Description = "Tärnade", Name = "lammgrytbitar", Amount = 300 },
-                        new() { UnitId = units[" "], RecipeId = recipes["Lammgryta med kikärtor"], Description = "", Name = "salt och peppar", Amount = 0 },
-                        new() { UnitId = units["st"], RecipeId = recipes["Lammgryta med kikärtor"],Description = "övermogen", Name = "vitlöksklyfta", Amount = 1 },
-                        new() { UnitId = units["tsk"], RecipeId = recipes["Lammgryta med kikärtor"],Description = "malen", Name = "tsk malen spiskummin", Amount = 1 },
-                        new() { UnitId = units["dl"], RecipeId = recipes["Lammgryta med kikärtor"],Description = "kallt",  Name = "vatten", Amount = 2 },
+                        new() { UnitId = units["st"], RecipeId = recipes["Spaghetti Bolognese"], Name = "Gul lök", Amount = 1, Description = "hackad" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Spaghetti Bolognese"], Name = "Vitlöksklyfta", Amount = 2, Description = "pressade" },
+                        new() { UnitId = units["g"], RecipeId = recipes["Spaghetti Bolognese"], Name = "Köttfärs", Amount = 400, Description = "nötfärs" },
+                        new() { UnitId = units["g"], RecipeId = recipes["Spaghetti Bolognese"], Name = "Krossade tomater", Amount = 400, Description = "" },
+                        new() { UnitId = units["msk"], RecipeId = recipes["Spaghetti Bolognese"], Name = "Tomatpuré", Amount = 1, Description = "" },
+                        new() { UnitId = units["msk"], RecipeId = recipes["Spaghetti Bolognese"], Name = "Olivolja", Amount = 1, Description = "" },
 
-                        new() { UnitId = units["g"], RecipeId = recipes["Potatissoppa med fänkål och purjolök"], Name = "skalad potatis, mjölig sort", Amount = 200, Description = "skuren i bitar" },
-                        new() { UnitId = units["st"], RecipeId = recipes["Potatissoppa med fänkål och purjolök"], Name = "fänkål", Amount = 1, Description = "tärnad" },
-                        new() { UnitId = units["g"], RecipeId = recipes["Potatissoppa med fänkål och purjolök"], Name = "smör", Amount = 100, Description = "osaltat" },
-                        new() { UnitId = units["dl"], RecipeId = recipes["Potatissoppa med fänkål och purjolök"], Name = "vatten", Amount = 4, Description = "kallt" },
-                        new() { UnitId = units["st"], RecipeId = recipes["Potatissoppa med fänkål och purjolök"], Name = "tärning grönsaksbuljong", Amount = 1, Description = "utan glutamat" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Köttbullar"], Name = "Gul lök", Amount = 1, Description = "finhackad" },
+                        new() { UnitId = units["dl"], RecipeId = recipes["Köttbullar"], Name = "Mjölk", Amount = 1, Description = "" },
+                        new() { UnitId = units["dl"], RecipeId = recipes["Köttbullar"], Name = "Ströbröd", Amount = 1, Description = "" },
+                        new() { UnitId = units["g"], RecipeId = recipes["Köttbullar"], Name = "Köttfärs", Amount = 500, Description = "blandfärs" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Köttbullar"], Name = "Ägg", Amount = 1, Description = "" },
 
-                        new() { UnitId = units["g"], RecipeId = recipes["Räksallad med sparris och sojamajonnäs"], Name = "(hand)skalade räkor", Amount = 150, Description = "färska" },
-                        new() { UnitId = units["g"], RecipeId = recipes["Räksallad med sparris och sojamajonnäs"], Name = "grön sparris", Amount = 250, Description = "skuren i bitar" },
-                        new() { UnitId = units["st"], RecipeId = recipes["Räksallad med sparris och sojamajonnäs"], Name = "hjärtsallad", Amount = 2, Description = "grovt hackad" },
-                        new() { UnitId = units["st"], RecipeId = recipes["Räksallad med sparris och sojamajonnäs"], Name = "mogen mango", Amount = 1, Description = "skuren i bitar" },
-                        new() { UnitId = units["cl"], RecipeId = recipes["Räksallad med sparris och sojamajonnäs"], Name = "citronjuice", Amount = 1, Description = "färskpressad" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Vegetarisk lasagne"], Name = "Zucchini", Amount = 1, Description = "skivad" },
+                        new() { UnitId = units["g"], RecipeId = recipes["Vegetarisk lasagne"], Name = "Spenat", Amount = 200, Description = "fryst, tinad" },
+                        new() { UnitId = units["g"], RecipeId = recipes["Vegetarisk lasagne"], Name = "Krossade tomater", Amount = 400, Description = "" },
+                        new() { UnitId = units["dl"], RecipeId = recipes["Vegetarisk lasagne"], Name = "Riven ost", Amount = 2, Description = "" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Vegetarisk lasagne"], Name = "Lasagneplattor", Amount = 9, Description = "" },
 
-                        new() { UnitId = units["g"], RecipeId = recipes["Köttbullar"], Name = "nötfärs", Amount = 1, Description = "utan tillsatser" },
-                        new() { UnitId = units["g"], RecipeId = recipes["Köttbullar"], Name = "ströbröd", Amount = 50, Description = "färskt" },
-                        new() { UnitId = units["st"], RecipeId = recipes["Köttbullar"], Name = "ägg", Amount = 1, Description = "från frigående höns" },
-                        new() { UnitId = units["dl"], RecipeId = recipes["Köttbullar"], Name = "mjölk", Amount = 3, Description = "ekologisk" },
-                        new() { UnitId = units["msk"], RecipeId = recipes["Köttbullar"], Name = "fond", Amount = 2, Description = "okryddad" },
-
-                        new() { UnitId = units["g"], RecipeId = recipes["Kycklinggryta"], Name = "Kycklingfilé", Amount = 500, Description = "utan skinn och ben" },
-                        new() { UnitId = units["tsk"], RecipeId = recipes["Kycklinggryta"], Name = "Curry", Amount = 2, Description = "mild" },
-                        new() { UnitId = units["st"], RecipeId = recipes["Kycklinggryta"], Name = "ägg", Amount = 1, Description = "från frigående höns" },
-                        new() { UnitId = units["dl"], RecipeId = recipes["Kycklinggryta"], Name = "mjölk", Amount = 2, Description = "ekologisk" },
-                        new() { UnitId = units["msk"], RecipeId = recipes["Kycklinggryta"], Name = "fond", Amount = 2, Description = "okryddad" },
-
-                        new() { UnitId = units["g"], RecipeId = recipes["Spaghetti Bolognese"], Name = "Köttfärs", Amount = 500, Description = "nötfärs" },
-                        new() { UnitId = units["dl"], RecipeId = recipes["Spaghetti Bolognese"], Name = "Tomatsås", Amount = 2, Description = "hemgjord" },
-                        new() { UnitId = units["st"], RecipeId = recipes["Spaghetti Bolognese"], Name = "Lök", Amount = 1, Description = "hackad" },
-                        new() { UnitId = units["tsk"], RecipeId = recipes["Spaghetti Bolognese"], Name = "Kryddor (oregano, basilika)", Amount = 2, Description = "torkade" },
-                        new() { UnitId = units["g"], RecipeId = recipes["Spaghetti Bolognese"], Name = "Pasta", Amount = 400, Description = "spaghetti" },
-
-                        new() { UnitId = units["g"], RecipeId = recipes["Vegetarisk lasagne"], Name = "Spenat", Amount = 300, Description = "fryst" },
-                        new() { UnitId = units["g"], RecipeId = recipes["Vegetarisk lasagne"], Name = "Ricotta", Amount = 200, Description = "färsk" },
-                        new() { UnitId = units["dl"], RecipeId = recipes["Vegetarisk lasagne"], Name = "Tomatsås", Amount = 2, Description = "hemgjord" },
-                        new() { UnitId = units["st"], RecipeId = recipes["Vegetarisk lasagne"], Name = "Lasagneplattor", Amount = 12, Description = "kokta" },
-                        new() { UnitId = units["tsk"], RecipeId = recipes["Vegetarisk lasagne"], Name = "Kryddor (oregano, basilika)", Amount = 2, Description = "torkade" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Falafel med hummus"], Name = "Vitlöksklyfta", Amount = 1, Description = "" },
+                        new() { UnitId = units["g"], RecipeId = recipes["Falafel med hummus"], Name = "Kikärtor", Amount = 400, Description = "kokta" },
+                        new() { UnitId = units["msk"], RecipeId = recipes["Falafel med hummus"], Name = "Persilja", Amount = 2, Description = "färsk, hackad" },
+                        new() { UnitId = units["tsk"], RecipeId = recipes["Falafel med hummus"], Name = "Spiskummin", Amount = 1, Description = "" },
+                        new() { UnitId = units["msk"], RecipeId = recipes["Falafel med hummus"], Name = "Vetemjöl", Amount = 2, Description = "" },
 
                         new() { UnitId = units["g"], RecipeId = recipes["Tacos med guacamole"], Name = "Köttfärs", Amount = 400, Description = "nötfärs" },
-                        new() { UnitId = units["st"], RecipeId = recipes["Tacos med guacamole"], Name = "Taco-skal", Amount = 8, Description = "mjuka" },
-                        new() { UnitId = units["dl"], RecipeId = recipes["Tacos med guacamole"], Name = "Salsa", Amount = 1, Description = "färsk" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Tacos med guacamole"], Name = "Tacokrydda", Amount = 1, Description = "" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Tacos med guacamole"], Name = "Tomat", Amount = 2, Description = "tärnad" },
                         new() { UnitId = units["st"], RecipeId = recipes["Tacos med guacamole"], Name = "Avokado", Amount = 2, Description = "mosad" },
-                        new() { UnitId = units["g"], RecipeId = recipes["Tacos med guacamole"], Name = "Riven ost", Amount = 100, Description = "cheddar" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Tacos med guacamole"], Name = "Tortillabröd", Amount = 8, Description = "små" },
 
-                        new() { UnitId = units["g"], RecipeId = recipes["Fiskgryta med saffran"], Name = "Fisk (t.ex. torsk)", Amount = 400, Description = "tärnad" },
-                        new() { UnitId = units["dl"], RecipeId = recipes["Fiskgryta med saffran"], Name = "Fiskbuljong", Amount = 1, Description = "hemmagjord" },
-                        new() { UnitId = units["dl"], RecipeId = recipes["Fiskgryta med saffran"], Name = "Grädde", Amount = 2, Description = "fet" },
-                        new() { UnitId = units["g"], RecipeId = recipes["Fiskgryta med saffran"], Name = "Fänkål", Amount = 150, Description = "skuren" },
-                        new() { UnitId = units["msk"], RecipeId = recipes["Fiskgryta med saffran"], Name = "Saffran", Amount = 1, Description = "krossat" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Kycklinggryta"], Name = "Gul lök", Amount = 1, Description = "hackad" },
+                        new() { UnitId = units["g"], RecipeId = recipes["Kycklinggryta"], Name = "Kycklingfilé", Amount = 500, Description = "strimlad" },
+                        new() { UnitId = units["dl"], RecipeId = recipes["Kycklinggryta"], Name = "Grädde", Amount = 2, Description = "matlagningsgrädde" },
+                        new() { UnitId = units["msk"], RecipeId = recipes["Kycklinggryta"], Name = "Curry", Amount = 1, Description = "" },
+                        new() { UnitId = units["msk"], RecipeId = recipes["Kycklinggryta"], Name = "Olivolja", Amount = 1, Description = "" },
 
-                        new() { UnitId = units["g"], RecipeId = recipes["Falafel med hummus"], Name = "Kikärtor", Amount = 400, Description = "kokta" },
-                        new() { UnitId = units["g"], RecipeId = recipes["Falafel med hummus"], Name = "Lök", Amount = 1, Description = "hackad" },
-                        new() { UnitId = units["tsk"], RecipeId = recipes["Falafel med hummus"], Name = "Spiskummin", Amount = 1, Description = "malen" },
-                        new() { UnitId = units["msk"], RecipeId = recipes["Falafel med hummus"], Name = "Olivolja", Amount = 2, Description = "extra virgin" },
-                        new() { UnitId = units["dl"], RecipeId = recipes["Falafel med hummus"], Name = "Hummus", Amount = 1, Description = "hemgjord" }
+                        new() { UnitId = units["g"], RecipeId = recipes["Lammgryta med kikärtor"], Name = "Lammkött", Amount = 500, Description = "tärnat" },
+                        new() { UnitId = units["g"], RecipeId = recipes["Lammgryta med kikärtor"], Name = "Kikärtor", Amount = 400, Description = "kokta" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Lammgryta med kikärtor"], Name = "Gul lök", Amount = 1, Description = "hackad" },
+                        new() { UnitId = units["msk"], RecipeId = recipes["Lammgryta med kikärtor"], Name = "Tomatpuré", Amount = 1, Description = "" },
+                        new() { UnitId = units["dl"], RecipeId = recipes["Lammgryta med kikärtor"], Name = "Vatten", Amount = 2, Description = "" },
+
+                        new() { UnitId = units["st"], RecipeId = recipes["Fiskgryta med saffran"], Name = "Vit fisk", Amount = 400, Description = "torsk, tärnad" },
+                        new() { UnitId = units["dl"], RecipeId = recipes["Fiskgryta med saffran"], Name = "Grädde", Amount = 2, Description = "matlagningsgrädde" },
+                        new() { UnitId = units["msk"], RecipeId = recipes["Fiskgryta med saffran"], Name = "Fiskfond", Amount = 2, Description = "" },
+                        new() { UnitId = units["g"], RecipeId = recipes["Fiskgryta med saffran"], Name = "Tomat", Amount = 200, Description = "tärnad" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Fiskgryta med saffran"], Name = "Saffran", Amount = 1, Description = "påse" },
+
+                        new() { UnitId = units["st"], RecipeId = recipes["Potatissoppa med fänkål och purjolök"], Name = "Potatis", Amount = 4, Description = "mjölig" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Potatissoppa med fänkål och purjolök"], Name = "Fänkål", Amount = 1, Description = "strimlad" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Potatissoppa med fänkål och purjolök"], Name = "Purjolök", Amount = 1, Description = "skivad" },
+                        new() { UnitId = units["dl"], RecipeId = recipes["Potatissoppa med fänkål och purjolök"], Name = "Grönsaksbuljong", Amount = 5, Description = "" },
+                        new() { UnitId = units["dl"], RecipeId = recipes["Potatissoppa med fänkål och purjolök"], Name = "Grädde", Amount = 1, Description = "" },
+
+                        new() { UnitId = units["g"], RecipeId = recipes["Räksallad med sparris och sojamajonnäs"], Name = "Räkor", Amount = 200, Description = "skalade" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Räksallad med sparris och sojamajonnäs"], Name = "Sparris", Amount = 8, Description = "grön, kokt" },
+                        new() { UnitId = units["dl"], RecipeId = recipes["Räksallad med sparris och sojamajonnäs"], Name = "Majonnäs", Amount = 1, Description = "blandad med soja" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Räksallad med sparris och sojamajonnäs"], Name = "Sallad", Amount = 1, Description = "valfri, sköljd" },
+                        new() { UnitId = units["st"], RecipeId = recipes["Räksallad med sparris och sojamajonnäs"], Name = "Ägg", Amount = 2, Description = "kokta" }
                     };
 
                     foreach (var ingredient in ingredients)
@@ -166,7 +166,7 @@ namespace meal_menu_api.Database.Seeders
                         new() { RecipeId = recipes["Kycklinggryta"], Description = "Strimla kycklingfilén" },
                         new() { RecipeId = recipes["Kycklinggryta"], Description = "Koka ris." },
                         new() { RecipeId = recipes["Kycklinggryta"], Description = "Stek tills de är gyllenbruna." },
-                                      
+
                         new() { RecipeId = recipes["Spaghetti Bolognese"], Description = "Hacka löken och fräs den i en panna." },
                         new() { RecipeId = recipes["Spaghetti Bolognese"], Description = "Tillsätt köttfärs och bryn den." },
                         new() { RecipeId = recipes["Spaghetti Bolognese"], Description = "Häll i tomatsåsen och låt sjuda i 15-20 minuter." },
@@ -178,7 +178,7 @@ namespace meal_menu_api.Database.Seeders
                         new() { RecipeId = recipes["Vegetarisk lasagne"], Description = "Varva lasagneplattor med spenat- och ricottablandningen och tomatsås." },
                         new() { RecipeId = recipes["Vegetarisk lasagne"], Description = "Gratinera lasagnen i ugnen i 30-40 minuter." },
                         new() { RecipeId = recipes["Vegetarisk lasagne"], Description = "Låt lasagnen vila innan den skärs upp och serveras." },
-       
+
                         new() { RecipeId = recipes["Tacos med guacamole"], Description = "Koka köttfärsen med tacokryddor och häll i salsa." },
                         new() { RecipeId = recipes["Tacos med guacamole"], Description = "Fyll taco-skal med köttfärsblandningen." },
                         new() { RecipeId = recipes["Tacos med guacamole"], Description = "Mosa avokadon och blanda med limejuice och vitlök för att göra guacamole." },

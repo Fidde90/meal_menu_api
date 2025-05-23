@@ -17,7 +17,13 @@ namespace meal_menu_api
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+              .AddJsonOptions(options =>
+               {
+                   //för att converta enums automatiskt till sin strängvariant
+                   options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+               });
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -33,8 +39,8 @@ namespace meal_menu_api
             builder.Services.RegisterJwt(builder.Configuration);
 
             // Global Apinyckel och ser till att Jsonobject inte hamnar i en stack overflow
-            builder.Services.AddControllers(options => { options.Filters.Add<UseApiKeyAttribute>();});
-
+            //builder.Services.AddControllers(options => { options.Filters.Add<UseApiKeyAttribute>();});
+       
             // Identity user regler
             builder.Services.AddDefaultIdentity<AppUser>(x => {
                 x.SignIn.RequireConfirmedAccount = false;
@@ -49,9 +55,16 @@ namespace meal_menu_api
             // Cors
             builder.Services.AddCors(options =>
             {
+                //options.AddPolicy("Meal_menu_client", policy =>
+                //{
+                //    policy.WithOrigins("http://localhost:5173")
+                //          .AllowAnyHeader()
+                //          .AllowAnyMethod();
+                //});
+
                 options.AddPolicy("Meal_menu_client", policy =>
                 {
-                    policy.WithOrigins("http://localhost:5173")
+                    policy.AllowAnyOrigin()
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
@@ -73,10 +86,18 @@ namespace meal_menu_api
                 RequestPath = "/Images"  // URL-prefix som du använder för att komma åt bilder
             });
 
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(x =>
+                {
+                    x.SwaggerEndpoint("/swagger/v1/swagger.json", "Meal menu v1");
+                });
+            }
+
             // Configure the HTTP request pipeline
             app.UseCors("Meal_menu_client");
-            app.UseSwagger();
-            app.UseSwaggerUI(x => x.SwaggerEndpoint("/swagger/v1/swagger.json", "Meal menu v1"));
             app.UseSwaggerUI();
             app.UseHttpsRedirection();
             app.UseAuthentication();

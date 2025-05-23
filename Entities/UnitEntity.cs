@@ -14,5 +14,8 @@ namespace meal_menu_api.Entities
         public DateTime CreatedAt { get; set; }
 
         public DateTime UpdatedAt { get; set; }
+
+        public ICollection<IngredientEntity>? Ingredients { get; set; }
+
     }
 }
