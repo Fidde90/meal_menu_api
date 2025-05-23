@@ -48,7 +48,6 @@ namespace meal_menu_api.Controllers
 
 
             //_dataContext.ShoppingLists.Add(shoppingList);
-            _dataContext.ShoppingLists.Add(shoppingList);
 
             await _dataContext.SaveChangesAsync();
             //await _dataContext.SaveChangesAsync();
