@@ -14,7 +14,7 @@ namespace meal_menu_api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [UseApiKey]
-
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class ShoppingListController : ControllerBase
     {
 
@@ -27,86 +27,91 @@ namespace meal_menu_api.Controllers
 
         [HttpGet]
         [Route("get")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> GetShoppingList()
         {
-            var user = await _dataContext.Users.FirstOrDefaultAsync();
+            var user = await _dataContext.Users
+                .Include(u => u.DinnerSchedules)
+                    .ThenInclude(ds => ds.Dinners)
+                .Include(u => u.DinnerSchedules)
+                    .ThenInclude(ds => ds.ShoppingList)
+                        .ThenInclude(sl => sl!.Ingredients)
+                .FirstOrDefaultAsync(u => u.Email == User.Identity!.Name);
 
-            var dinnerSchedule = await _dataContext.DinnerSchedules
-                .Include(ds => ds.Dinners)
-                .FirstOrDefaultAsync(ds => ds.UserId == user!.Id);
+            if (user == null)
+                return NotFound("user not found");
 
-            var recipeIds = dinnerSchedule!.Dinners
-                .Select(d => d.RecipeId)
-                .Distinct()
-                .ToList();
+            DateTime now = DateTime.Now;
+            var dinnerSchedule = user.DinnerSchedules.FirstOrDefault(ds => (ds.StartsAtDate <= now) &&
+                                                                                (ds.EndsAtDate > now));
+            if (dinnerSchedule == null)
+                return NotFound("no active dinner schedule");
 
-            var ingredients = await _dataContext.Ingredients
-                .Where(i => recipeIds.Contains(i.RecipeId))
-                .Include(i => i.Unit)
-                .ToListAsync();
-
-
-            //_dataContext.ShoppingLists.Add(shoppingList);
-
-            await _dataContext.SaveChangesAsync();
-            //await _dataContext.SaveChangesAsync();
-
-
-            var shoppinglistEntity = _dataContext.ShoppingLists.FirstOrDefault();
-
-            var shoppingListDto = new ShoppingListDto
-
+            if (dinnerSchedule.ShoppingList == null)
             {
-                Id = shoppinglistEntity.Id,
-                Name = shoppinglistEntity.Name,
-                Notes = shoppinglistEntity.Notes,
-                Status = shoppinglistEntity.Status,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
-            };
-
-            var list = shoppingListDto!.Ingredients;
-
-            foreach (var item in ingredients)
-            {
-                //UnitEntity unit = _dataContext.Units.First(u => u.Id == item.UnitId);
-
-                var convertetVolume = ConvertVolume(new ConvertModel(item.Unit.Name, item.Amount));
-
-                if (list.Any(s => AreEqual(s.Name, item.Name) && AreEqual(s.Description, item.Description) && AreEqual(s.Unit, convertetVolume.Unit)))
+                var shoppingList = new ShoppingListEntity
                 {
-                    ShoppingListIngredientDto exist = 
-                        list.First(l => 
-                             AreEqual(l.Name, item.Name) && 
-                             AreEqual(l.Description, item.Description) && 
-                             AreEqual(l.Unit, convertetVolume.Unit)
-                        );
+                    User = user!,
+                    UserId = user!.Id,
+                    DinnerScheduleId = dinnerSchedule.Id,
+                    DinnerSchedule = dinnerSchedule,
+                    Status = ShoppingListStatus.Active,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
 
-                    exist.Amount = exist.Amount + convertetVolume.Volume;
-                }
-                else
+                var includedRecipeIds = dinnerSchedule!.Dinners
+                    .Select(d => d.RecipeId)
+                    .Distinct()
+                    .ToList();
+
+                var ingredients = await _dataContext.Ingredients
+                    .Where(i => includedRecipeIds.Contains(i.RecipeId))
+                    .Include(i => i.Unit)
+                    .ToListAsync();
+
+                var shoppingListIngredients = new List<ShoppingListIngredientEntity>();
+
+                foreach (var ingredient in ingredients)
                 {
-                    var newItem = new ShoppingListIngredientDto
+                    var convertedVolume = ConvertVolume(new ConvertModel(ingredient.Unit.Name, ingredient.Amount));
+
+                    var ingredientInList = shoppingListIngredients
+                                        .FirstOrDefault(i => AreEqual(i.Name, ingredient.Name) &&
+                                                             AreEqual(i.Description, ingredient.Description) &&
+                                                             AreEqual(i.Unit, convertedVolume.Unit));
+
+                    if (ingredientInList != null)
                     {
-                        Id = item.Id,
-                        ShoppingListId = shoppingListDto.Id,
-                        Description = item.Description,
-                        Name = item.Name,
-                        Amount = convertetVolume.Volume,
-                        Unit = convertetVolume.Unit,
-                        IsChecked = false,
-                        CreatedAt = DateTime.Now,
-                        UpdatedAt = DateTime.Now
-                    };
+                        ingredientInList.Amount += convertedVolume.Volume;
+                    }
+                    else
+                    {
+                        var newItem = new ShoppingListIngredientEntity
+                        {
+                            ShoppingListId = shoppingList.Id,
+                            ShoppingList = shoppingList,
+                            Description = ingredient.Description,
+                            Name = ingredient.Name,
+                            Amount = convertedVolume.Volume,
+                            Unit = convertedVolume.Unit,
+                            IsChecked = false,
+                        };
 
-                    list.Add(newItem);
+                        shoppingListIngredients.Add(newItem);
+                    }
                 }
+
+                List<ShoppingListIngredientEntity> convertedEntities = ConvertIngredientVolumes(shoppingListIngredients);
+
+                shoppingList.Ingredients = convertedEntities;
+
+                _dataContext.ShoppingLists.Add(shoppingList);
+                await _dataContext.SaveChangesAsync();
+
+                return Ok();
             }
 
-            List<ShoppingListIngredientDto> returnList = ConvertIngredientVolumes(list);
-
-            return Ok(returnList);
+            return Ok();
         }
 
         public static bool AreEqual(string? a, string? b)
@@ -164,16 +169,16 @@ namespace meal_menu_api.Controllers
                 {
                     case "kg": return new ConvertModel("g", volume * 1000);
                     case "hg": return new ConvertModel("g", volume * 100);
-                    case "g": return new ConvertModel("g", volume);
+                    case "g" : return new ConvertModel("g", volume);
                 }
             }
 
             return null!;
         }
 
-        public List<ShoppingListIngredientDto> ConvertIngredientVolumes(List<ShoppingListIngredientDto> ingredients)
+        public List<ShoppingListIngredientEntity> ConvertIngredientVolumes(List<ShoppingListIngredientEntity> ingredients)
         {
-            List<ShoppingListIngredientDto> convertedIngredients = [];
+            List<ShoppingListIngredientEntity> convertedIngredients = [];
 
             foreach (var ingredient in ingredients)
             {
@@ -184,7 +189,6 @@ namespace meal_menu_api.Controllers
                 {
                     var conversions = new List<(double v, string u)>
                     {
-
                         (1000, "l"),
                         (100, "dl"),
                         (15, "msk"),

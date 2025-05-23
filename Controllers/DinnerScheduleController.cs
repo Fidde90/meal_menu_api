@@ -19,8 +19,6 @@ namespace meal_menu_api.Controllers
         private readonly DataContext _dataContext = dataContext;
         private readonly ToolBox _toolBox = toolBox;
 
-
-
         [HttpPost]
         [Route("create")]
         public async Task<IActionResult> CreateDinnerSchedule(DinnerScheduleFormModel model)
@@ -157,12 +155,10 @@ namespace meal_menu_api.Controllers
 
             DateTime now = DateTime.Now;
 
-
             var activeSchedule = user.DinnerSchedules.FirstOrDefault(ds => (ds.StartsAtDate <= now) && (ds.EndsAtDate > now));
 
             if (activeSchedule == null)
                 return NotFound("no active schedule");
-
 
             var scheduleDto = new DinnerScheduleDto()
             {

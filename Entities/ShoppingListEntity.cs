@@ -25,10 +25,10 @@ namespace meal_menu_api.Entities
 
         public ShoppingListStatus Status { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        public DateTime UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-        public List<ShoppingListIngredientEntity> Ingredients { get; set; } = new List<ShoppingListIngredientEntity>();
+        public List<ShoppingListIngredientEntity> Ingredients { get; set; } = [];
     }
 }
