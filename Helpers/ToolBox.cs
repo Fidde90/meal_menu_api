@@ -5,7 +5,7 @@
         public List<T> ShuffleArray<T>(List<T> array)
         {
             Random rng = new Random();
-            
+
             for (int i = array.Count - 1; i > 0; i--)
             {
                 int j = rng.Next(i + 1);
