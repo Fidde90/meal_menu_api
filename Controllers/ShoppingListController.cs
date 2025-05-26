@@ -33,36 +33,42 @@ namespace meal_menu_api.Controllers
 
             var shoppingList = await _shoppingListManager.CreateShoppingList(User.Identity!.Name!);
 
-            var shoppingListDto = new ShoppingListDto
+            if(shoppingList != null)
             {
-                Id = shoppingList.Id,
-                Name = shoppingList.Name,
-                Notes = shoppingList.Notes,
-                Status = shoppingList.Status,
-                CreatedAt = shoppingList.CreatedAt,
-                UpdatedAt = shoppingList.UpdatedAt,
-            };
-
-
-            foreach (var ingredient in shoppingList.Ingredients)
-            {
-                var newIngredientDto = new ShoppingListIngredientDto
+                var shoppingListDto = new ShoppingListDto
                 {
-                    Id = ingredient.Id,
-                    ShoppingListId = ingredient.Id,
-                    Description = ingredient.Description,
-                    Name = ingredient.Name,
-                    Amount = ingredient.Amount,
-                    Unit = ingredient.Unit,
-                    IsChecked = ingredient.IsChecked,
-                    CreatedAt = ingredient.CreatedAt,
-                    UpdatedAt = ingredient.UpdatedAt,
+                    Id = shoppingList.Id,
+                    Name = shoppingList.Name,
+                    Notes = shoppingList.Notes,
+                    Status = shoppingList.Status,
+                    CreatedAt = shoppingList.CreatedAt,
+                    UpdatedAt = shoppingList.UpdatedAt,
                 };
 
-                shoppingListDto.Ingredients.Add(newIngredientDto);
+
+                foreach (var ingredient in shoppingList.Ingredients)
+                {
+                    var newIngredientDto = new ShoppingListIngredientDto
+                    {
+                        Id = ingredient.Id,
+                        ShoppingListId = ingredient.Id,
+                        Description = ingredient.Description,
+                        Name = ingredient.Name,
+                        Amount = ingredient.Amount,
+                        Unit = ingredient.Unit,
+                        IsChecked = ingredient.IsChecked,
+                        CreatedAt = ingredient.CreatedAt,
+                        UpdatedAt = ingredient.UpdatedAt,
+                    };
+
+                    shoppingListDto.Ingredients.Add(newIngredientDto);
+                }
+
+                return Ok(shoppingListDto);
             }
 
-            return Ok(shoppingListDto);
+            return StatusCode(500);
+
         }
     }
 }
