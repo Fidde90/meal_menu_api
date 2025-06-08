@@ -1,5 +1,5 @@
 ﻿using meal_menu_api.Dtos;
-using meal_menu_api.Entities;
+using meal_menu_api.Entities.Recipes;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace meal_menu_api.Mappers

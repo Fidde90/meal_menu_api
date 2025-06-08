@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using meal_menu_api.Entities.Dinners;
+using meal_menu_api.Entities.Recipes;
+using meal_menu_api.Entities.ShoppingList;
+using Microsoft.AspNetCore.Identity;
 
-namespace meal_menu_api.Entities
+namespace meal_menu_api.Entities.Account
 {
     public class AppUser : IdentityUser
     {

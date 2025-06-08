@@ -1,5 +1,6 @@
 ﻿using meal_menu_api.Database.Context;
 using meal_menu_api.Entities;
+using meal_menu_api.Entities.Recipes;
 
 namespace meal_menu_api.Database.Seeders
 {

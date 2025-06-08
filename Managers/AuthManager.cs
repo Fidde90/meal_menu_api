@@ -1,4 +1,4 @@
-﻿using meal_menu_api.Entities;
+﻿using meal_menu_api.Entities.Account;
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;

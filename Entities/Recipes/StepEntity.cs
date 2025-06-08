@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace meal_menu_api.Entities
+namespace meal_menu_api.Entities.Recipes
 {
-    public class ImageEntity
+    public class StepEntity
     {
         [Key]
         public int Id { get; set; }
@@ -14,7 +14,8 @@ namespace meal_menu_api.Entities
         public RecipeEntity Recipe { get; set; } = null!;
 
         [Required]
-        public string ImageUrl { get; set; } = null!;
+        [MinLength(2)]
+        public string Description { get; set; } = null!;
 
         public DateTime CreatedAt { get; set; }
 

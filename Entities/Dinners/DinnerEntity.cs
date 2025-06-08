@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace meal_menu_api.Entities
+namespace meal_menu_api.Entities.Dinners
 {
     public class DinnerEntity
     {

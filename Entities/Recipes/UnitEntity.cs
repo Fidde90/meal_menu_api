@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using meal_menu_api.Entities.Recipes;
+using System.ComponentModel.DataAnnotations;
 
 namespace meal_menu_api.Entities
 {

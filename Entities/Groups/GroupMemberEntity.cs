@@ -1,4 +1,5 @@
 ﻿
+using meal_menu_api.Entities.Account;
 using meal_menu_api.Models.Enums;
 
 namespace meal_menu_api.Entities

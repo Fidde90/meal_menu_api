@@ -1,4 +1,5 @@
-﻿using meal_menu_api.Models.Enums;
+﻿using meal_menu_api.Entities.Account;
+using meal_menu_api.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace meal_menu_api.Entities

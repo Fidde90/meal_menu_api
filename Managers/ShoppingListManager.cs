@@ -1,9 +1,9 @@
 ﻿using meal_menu_api.Database.Context;
-using meal_menu_api.Entities;
 using meal_menu_api.Models.Enums;
 using meal_menu_api.Models;
 using Microsoft.EntityFrameworkCore;
 using meal_menu_api.Helpers;
+using meal_menu_api.Entities.ShoppingList;
 
 namespace meal_menu_api.Managers
 {

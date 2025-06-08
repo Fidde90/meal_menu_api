@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace meal_menu_api.Entities
+namespace meal_menu_api.Entities.Recipes
 {
     public class IngredientEntity
     {

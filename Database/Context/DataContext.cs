@@ -1,8 +1,12 @@
-﻿using meal_menu_api.Entities;
+﻿using meal_menu_api.Entities.Dinners;
+using meal_menu_api.Entities.Account;
+using meal_menu_api.Entities.Recipes;
 using meal_menu_api.Models.Enums;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using meal_menu_api.Entities;
+using meal_menu_api.Entities.ShoppingList;
 
 namespace meal_menu_api.Database.Context
 {

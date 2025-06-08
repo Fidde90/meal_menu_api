@@ -1,6 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using meal_menu_api.Entities.Account;
+using meal_menu_api.Entities.ShoppingList;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace meal_menu_api.Entities
+namespace meal_menu_api.Entities.Dinners
 {
     public class DinnerScheduleEntity
     {
