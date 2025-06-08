@@ -16,8 +16,8 @@ namespace meal_menu_api.Entities.Recipes
         [Required]
         public string ImageUrl { get; set; } = null!;
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        public DateTime UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
     }
 }

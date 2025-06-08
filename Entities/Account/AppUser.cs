@@ -11,9 +11,9 @@ namespace meal_menu_api.Entities.Account
 
         public string LastName { get; set; } = null!;
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        public DateTime UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
         public DateTime LastLogin { get; set; }
 

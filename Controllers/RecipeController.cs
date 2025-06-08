@@ -3,6 +3,7 @@ using meal_menu_api.Dtos;
 using meal_menu_api.Entities.Account;
 using meal_menu_api.Entities.Recipes;
 using meal_menu_api.Managers;
+using meal_menu_api.Mappers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +36,6 @@ namespace meal_menu_api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
 
-   
             AppUser? user = await _userManager.FindByEmailAsync(User.Identity!.Name!);
 
             if (user == null)
@@ -45,34 +45,19 @@ namespace meal_menu_api.Controllers
 
             try
             {
-                RecipeEntity newRecipe = new RecipeEntity
-                {
-                    Name = recipeDto.RecipeName!,
-                    Description = recipeDto.RecipeDescription!,
-                    Ppl = recipeDto.Ppl,
-                    UserId = user.Id,
-                    User = user,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
-                };
+                var newRecipe = RecipeMapper.ToRecipeEntity(recipeDto, user);
 
                 _dataContext.Recipes.Add(newRecipe);
                 await _dataContext.SaveChangesAsync();
 
-                if (!string.IsNullOrEmpty(recipeDto.Ingredients) && !string.IsNullOrEmpty(recipeDto.Steps))
-                {
-                    IEnumerable<IngredientDto> ingredients = [];
-                    IEnumerable<StepDto> steps = [];
+                IEnumerable<IngredientDto> ingredients = JsonConvert.DeserializeObject<IEnumerable<IngredientDto>>(recipeDto.Ingredients!)!;
+                IEnumerable<StepDto> steps = JsonConvert.DeserializeObject<IEnumerable<StepDto>>(recipeDto.Steps!)!;
 
-                    ingredients = JsonConvert.DeserializeObject<IEnumerable<IngredientDto>>(recipeDto.Ingredients!)!;
-                    steps = JsonConvert.DeserializeObject<IEnumerable<StepDto>>(recipeDto.Steps!)!;
+                if (ingredients != null && ingredients.Any())
+                    await _recipeManager.SaveIngredients(ingredients!, newRecipe);
 
-                    if(ingredients != null && ingredients.Any())
-                        await _recipeManager.SaveIngredients(ingredients!, newRecipe);
-
-                    if(steps != null && steps.Any())
-                        await _recipeManager.SaveSteps(steps!, newRecipe);
-                }
+                if (steps != null && steps.Any())
+                    await _recipeManager.SaveSteps(steps!, newRecipe);
 
                 if (recipeDto.Image != null)
                     await _recipeManager.SaveImages(recipeDto.Image!, newRecipe);
@@ -112,62 +97,14 @@ namespace meal_menu_api.Controllers
 
                 List<RecipeDtoGet> recipeDtos = [];
 
-                foreach(RecipeEntity recipe in recipeEntities)
+                foreach (RecipeEntity recipe in recipeEntities)
                 {
-                    RecipeDtoGet newRecipeDto = new()
-                    {
-                        Id = recipe.Id,                       
-                        Name = recipe.Name,
-                        Description = recipe.Description,
-                        Ppl = recipe.Ppl,
-                        CreatedAt = recipe.CreatedAt,
-                        UpdatedAt = recipe.UpdatedAt,
-                    };
-
-                    foreach (IngredientEntity ingredient in recipe.Ingredients)
-                    {
-                        IngredientDto newIngredient = new()
-                        {
-                            Id = ingredient.Id,
-                            Description = ingredient.Description,
-                            Name = ingredient.Name,
-                            Amount = ingredient.Amount,
-                            Unit = ingredient.Unit.Name ?? null,
-                            CreatedAt = ingredient.CreatedAt,
-                            UpdatedAt = ingredient.UpdatedAt,
-                        };
-
-                        newRecipeDto.Ingredients.Add(newIngredient);
-                    }
-
-                    foreach (StepEntity step in recipe.Steps)
-                    {
-                        StepDto newStep = new()
-                        {
-                            Id = step.Id,
-                            Description = step.Description,
-                            CreatedAt = step.CreatedAt,
-                            UpdatedAt = step.UpdatedAt,
-                        };
-
-                        newRecipeDto.Steps.Add(newStep);
-                    }
-
-                    foreach (ImageEntity image in recipe.Images)
-                    {
-                        ImageDto newImage = new()
-                        {
-                            Id = image.Id,
-                            ImageUrl = image.ImageUrl?.Replace("\\", "/")!,
-                            CreatedAt = image.CreatedAt,
-                            UpdatedAt = image.UpdatedAt,
-                        };
-
-                        newRecipeDto.Images.Add(newImage);
-                    }
+                    RecipeDtoGet newRecipeDto = RecipeMapper.ToRecipeDtoGet(recipe);
+                    newRecipeDto.Ingredients = IngredientMapper.IngredientsToDtos(recipe.Ingredients);
+                    newRecipeDto.Steps = StepMapper.StepsToDtos(recipe.Steps);
+                    newRecipeDto.Images = ImageMapper.ImagesToDtos(recipe.Images);
 
                     recipeDtos.Add(newRecipeDto);
-
                 }
 
                 return Ok(recipeDtos);
@@ -190,64 +127,15 @@ namespace meal_menu_api.Controllers
                 .Include(recipe => recipe.Images)
                 .FirstOrDefaultAsync(recipe => recipe.Id.ToString() == id);
 
-            if (recipe != null)
-            {
-                RecipeDtoGet newRecipeDto = new()
-                {
-                    Id = recipe!.Id,
-                    Name = recipe.Name,
-                    Description = recipe.Description,
-                    Ppl = recipe.Ppl,
-                    CreatedAt = recipe.CreatedAt,
-                    UpdatedAt = recipe.UpdatedAt,
-                };
+            if (recipe == null)
+                return NotFound();
 
-                foreach (IngredientEntity ingredient in recipe.Ingredients)
-                {
-                    IngredientDto newIngredient = new()
-                    { 
-                        Id = ingredient.Id,
-                        Description = ingredient.Description,
-                        Name = ingredient.Name,
-                        Amount = ingredient.Amount,
-                        Unit = ingredient.Unit.Name ?? null,
-                        CreatedAt = ingredient.CreatedAt,
-                        UpdatedAt = ingredient.UpdatedAt,
-                    };
+            RecipeDtoGet newRecipeDto = RecipeMapper.ToRecipeDtoGet(recipe);
+            newRecipeDto.Ingredients = IngredientMapper.IngredientsToDtos(recipe.Ingredients);
+            newRecipeDto.Steps = StepMapper.StepsToDtos(recipe.Steps);
+            newRecipeDto.Images = ImageMapper.ImagesToDtos(recipe.Images);
 
-                    newRecipeDto.Ingredients.Add(newIngredient);
-                }
-
-                foreach (StepEntity step in recipe.Steps)
-                {
-                    StepDto newStep = new()
-                    {
-                        Id = step.Id,
-                        Description = step.Description,
-                        CreatedAt = step.CreatedAt,
-                        UpdatedAt = step.UpdatedAt,
-                    };
-
-                    newRecipeDto.Steps.Add(newStep);
-                }
-
-                foreach (ImageEntity image in recipe.Images)
-                {
-                    ImageDto newImage = new()
-                    {
-                        Id = image.Id,
-                        ImageUrl = image.ImageUrl?.Replace("\\", "/")!,
-                        CreatedAt = image.CreatedAt,
-                        UpdatedAt = image.UpdatedAt,
-                    };
-
-                    newRecipeDto.Images.Add(newImage);
-                }
-
-                return Ok(newRecipeDto);
-            }
-
-            return NotFound();  
+            return Ok(newRecipeDto);
         }
 
         [HttpDelete]
@@ -272,7 +160,7 @@ namespace meal_menu_api.Controllers
         [HttpPut]
         [Route("update/{id}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> UpdateRecipe(string id, RecipeDtoCreate recipeDto )
+        public async Task<IActionResult> UpdateRecipe(string id, RecipeDtoCreate recipeDto)
         {
             AppUser? user = await _userManager.FindByEmailAsync(User!.Identity!.Name!);
             RecipeEntity? recipeEntity = await _dataContext.Recipes.FirstOrDefaultAsync(r => r.Id.ToString() == id) ?? null;
@@ -280,7 +168,7 @@ namespace meal_menu_api.Controllers
             List<StepDto> stepDtos = JsonConvert.DeserializeObject<List<StepDto>>(recipeDto.Steps!)!;
 
             recipeEntity!.Name = recipeDto.RecipeName;
-            recipeEntity.Description = recipeDto.RecipeDescription; 
+            recipeEntity.Description = recipeDto.RecipeDescription;
             recipeEntity.Ppl = recipeDto.Ppl;
             recipeEntity.UpdatedAt = DateTime.Now;
 
@@ -307,9 +195,9 @@ namespace meal_menu_api.Controllers
                     await _recipeManager.SaveSteps(newSteps, recipeEntity);
             }
 
-            if (ingredientDtos.Count < 1)         
+            if (ingredientDtos.Count < 1)
                 await _dataContext.Ingredients.Where(i => i.RecipeId == recipeEntity.Id).ExecuteDeleteAsync();
-            
+
             if (ingredientDtos.Count > 0)
             {
                 List<IngredientDto> newIngredients = [];
@@ -330,10 +218,10 @@ namespace meal_menu_api.Controllers
                     await _recipeManager.SaveIngredients(newIngredients, recipeEntity);
             }
 
-            if(recipeDto.DeleteImage && recipeDto.Image == null) //RADERA
-                 await _recipeManager.DeleteImage(recipeEntity.Id);
+            if (recipeDto.DeleteImage && recipeDto.Image == null) //RADERA
+                await _recipeManager.DeleteImage(recipeEntity.Id);
 
-            if(recipeDto.Image != null && !recipeDto.DeleteImage) //BYT UT //BEHÅLL
+            if (recipeDto.Image != null && !recipeDto.DeleteImage) //BYT UT //BEHÅLL
             {
                 await _recipeManager.DeleteImage(recipeEntity.Id);
                 await _recipeManager.SaveImages(recipeDto.Image, recipeEntity);

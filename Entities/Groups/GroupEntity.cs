@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using meal_menu_api.Entities.Groups;
+using System.ComponentModel.DataAnnotations;
 
 namespace meal_menu_api.Entities
 {
@@ -15,13 +16,14 @@ namespace meal_menu_api.Entities
 
         public string? IconUrl { get; set; }
 
-        public ICollection<GroupMemberEntity> Members { get; set; } = [];
-
         public DateTime CreatedAt { get; set; }
 
         public DateTime UpdatedAt { get; set; }
 
+        public ICollection<GroupMemberEntity> Members { get; set; } = [];
+
         public ICollection<GroupInvitationEntity> Invitations { get; set; } = [];
 
+        public ICollection<GroupRecipeEntity> GroupRecipes { get; set; } = [];
     }
 }

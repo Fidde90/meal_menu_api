@@ -1,15 +1,15 @@
 ﻿using meal_menu_api.Dtos;
+using meal_menu_api.Entities;
 using meal_menu_api.Entities.Recipes;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace meal_menu_api.Mappers
 {
     public static class IngredientMapper
     {
-        public static List<IngredientDto> MapManyIngredientsToDto(List<IngredientEntity> entites)
+        public static List<IngredientDto> IngredientsToDtos(List<IngredientEntity> entites)
         {
             if (entites.Count <= 0)
-                return null!;
+                return [];
 
             List<IngredientDto> listToReturn = [];
 
@@ -28,6 +28,22 @@ namespace meal_menu_api.Mappers
             }
 
             return listToReturn;
+        }
+
+        public static IngredientEntity ToIngredientEntity (IngredientDto dto, RecipeEntity recipe, UnitEntity unit)
+        {
+            IngredientEntity newIngredient = new() 
+            { 
+                Description = dto.Description,
+                Name = dto.Name,
+                Amount = dto.Amount,
+                UnitId = unit.Id,
+                Unit = unit,
+                RecipeId = recipe.Id,
+                Recipe = recipe,
+            };
+
+            return newIngredient;
         }
     }
 }

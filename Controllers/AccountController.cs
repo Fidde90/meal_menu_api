@@ -3,6 +3,7 @@ using meal_menu_api.Dtos;
 using meal_menu_api.Dtos.Account;
 using meal_menu_api.Entities.Account;
 using meal_menu_api.Managers;
+using meal_menu_api.Mappers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +32,6 @@ namespace meal_menu_api.Controllers
         [Route("register")]
         public async Task<IActionResult> RegisterUser(RegisterUserDto registerDto)
         {
-        
             if (ModelState.IsValid)
             {
                 var user = _dataContext.Users.FirstOrDefault(u => u.Email == registerDto.Email);
@@ -39,31 +39,18 @@ namespace meal_menu_api.Controllers
                     return Conflict("A user with this email already exists");
 
                 var existingUser = await _dataContext.Set<AppUser>().FindAsync(registerDto.Email);
+
                 if (existingUser != null)
                     return Conflict();
 
-                var newUser = new AppUser
-                {
-                    FirstName = registerDto.FirstName,
-                    LastName = registerDto.LastName,
-                    Email = registerDto.Email,
-                    UserName = registerDto.Email,
-                    EmailConfirmed = true,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now,
-                };
+                var createUser = await _userManager.CreateAsync(UserMapper.ToAppUser(registerDto), registerDto.Password);
 
-                var createUser = await _userManager.CreateAsync(newUser, registerDto.Password);
                 if (createUser.Succeeded)
-                {
                     return Created();
-                }
                 else
-                {
-                    var errors = string.Join("; ", createUser.Errors.Select(e => e.Description));
-                    return BadRequest($"User creation failed: {errors}");
-                }
+                    return BadRequest($"User creation failed: { string.Join("; ", createUser.Errors.Select(e => e.Description))}");
             }
+
             return BadRequest();
         }
 
@@ -79,25 +66,17 @@ namespace meal_menu_api.Controllers
                     return Unauthorized();
 
                 var signIn = await _signInManager.PasswordSignInAsync(loginDto.Email, loginDto.Password, false, false);
+
                 if (!signIn.Succeeded)
                     return BadRequest();
 
                 string jwtToken = _authManager.GetToken(existingUser);
+
                 if (jwtToken != null)
                 {
-                    var userDto = new UserDto
-                    {
-                        FirstName        = existingUser.FirstName!,
-                        LastName         = existingUser.LastName!,
-                        Email            = existingUser.Email!,
-                        UserName         = existingUser.UserName!,
-                        PhoneNumber      = existingUser.PhoneNumber ?? null,
-                        EmailConfirmed   = existingUser.EmailConfirmed,
-                        TowFactorEnabeld = existingUser.TwoFactorEnabled,
-                        LastLogin        = DateTime.Now
-                    };
-
+                    var userDto = UserMapper.ToUserDto(existingUser);
                     existingUser.LastLogin = DateTime.UtcNow;
+
                     await _userManager.UpdateAsync(existingUser);
                     return Ok(new { User = userDto, Token = jwtToken });
                 }

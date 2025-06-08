@@ -1,4 +1,7 @@
-﻿namespace meal_menu_api.Helpers
+﻿using meal_menu_api.Dtos.Account;
+using meal_menu_api.Entities.Recipes;
+
+namespace meal_menu_api.Helpers
 {
     public class ToolBox
     {
@@ -13,7 +16,6 @@
                 array[i] = array[j];
                 array[j] = temp;
             }
-
             return array;
         }
     }

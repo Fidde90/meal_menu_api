@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using meal_menu_api.Entities;
 using meal_menu_api.Entities.ShoppingList;
+using meal_menu_api.Entities.Groups;
 
 namespace meal_menu_api.Database.Context
 {
@@ -36,6 +37,8 @@ namespace meal_menu_api.Database.Context
         public DbSet<GroupMemberEntity> GroupMembers { get; set; }
 
         public DbSet<GroupInvitationEntity> GroupInvitations { get; set; }
+
+        public DbSet<GroupRecipeEntity> GroupRecipes { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -130,6 +133,11 @@ namespace meal_menu_api.Database.Context
                 .HasForeignKey(gm => gm.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<GroupRecipeEntity>()
+                .HasOne(x => x.RecipeOwner)
+                .WithMany(x => x.GroupMemberRecipes)
+                .HasForeignKey(x => new { x.OwnerGroupId, x.OwnerUserId })
+                .OnDelete(DeleteBehavior.Cascade);
 
             //INBJUDNINGAR
             modelBuilder.Entity<GroupInvitationEntity>()
@@ -148,7 +156,7 @@ namespace meal_menu_api.Database.Context
                 .WithMany()
                 .HasForeignKey(i => i.InvitedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
-
+  
             base.OnModelCreating(modelBuilder);
         }
     }

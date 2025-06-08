@@ -1,30 +1,25 @@
-﻿using meal_menu_api.Entities.Account;
-using System.ComponentModel.DataAnnotations;
+﻿using meal_menu_api.Entities.Recipes;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
-namespace meal_menu_api.Entities.Recipes
+namespace meal_menu_api.Entities.Groups
 {
-    public class RecipeEntity
+    public class GroupRecipeEntity
     {
         [Key]
         public int Id { get; set; }
 
-        [ForeignKey(nameof(User))]
-        public string UserId { get; set; } = null!;
+        public int OwnerGroupId { get; set; }
 
-        public AppUser User { get; set; } = null!;
+        public string OwnerUserId { get; set; } = null!;
 
-        [Required]
-        [MinLength(2)]
+        public GroupMemberEntity RecipeOwner { get; set; } = null!;
+
         public string Name { get; set; } = null!;
 
-        [Required]
-        [MinLength(5)]
         public string Description { get; set; } = null!;
 
-        public int Ppl {  get; set; }
-
-        public int RotationPoints { get; set; } = 0;
+        public int Ppl { get; set; }
 
         public DateTime CreatedAt { get; set; }
 

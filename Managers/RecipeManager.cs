@@ -2,6 +2,7 @@
 using meal_menu_api.Dtos;
 using meal_menu_api.Entities;
 using meal_menu_api.Entities.Recipes;
+using meal_menu_api.Mappers;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
@@ -28,21 +29,9 @@ namespace meal_menu_api.Managers
                 if (unit == null)
                     continue;
 
-                IngredientEntity newIngredient = new IngredientEntity
-                {
-                    Description = item.Description,
-                    Name = item.Name,
-                    Amount = item.Amount,
-                    UnitId = unit.Id,
-                    Unit = unit,
-                    RecipeId = recipe.Id,
-                    Recipe = recipe,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
-                };
-
-                ingredientsToSave.Add(newIngredient);
+                ingredientsToSave.Add(IngredientMapper.ToIngredientEntity(item, recipe, unit));
             }
+
             try
             {
                 _datacontext.Ingredients.AddRange(ingredientsToSave);
@@ -129,18 +118,8 @@ namespace meal_menu_api.Managers
             var StepsToSave = new List<StepEntity>();
 
             foreach (var item in list)
-            {
-                StepEntity newStep = new StepEntity
-                {
-                    Description = item.Description,
-                    RecipeId = recipe.Id,
-                    Recipe = recipe,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
-                };
+                StepsToSave.Add(StepMapper.ToStepEntity(item,recipe));
 
-                StepsToSave.Add(newStep);
-            }
             try
             {
                 _datacontext.Steps.AddRange(StepsToSave);
@@ -162,16 +141,7 @@ namespace meal_menu_api.Managers
 
             try
             {
-                ImageEntity newImage = new ImageEntity
-                {
-                    ImageUrl = filePath,
-                    RecipeId = recipe.Id,
-                    Recipe = recipe,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
-                };
-
-                await _datacontext.Images.AddAsync(newImage);
+                await _datacontext.Images.AddAsync(ImageMapper.ToImageEntity(filePath, recipe));
                 await _datacontext.SaveChangesAsync();
             }
             catch (Exception error)

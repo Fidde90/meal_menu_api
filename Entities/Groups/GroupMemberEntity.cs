@@ -1,5 +1,5 @@
-﻿
-using meal_menu_api.Entities.Account;
+﻿using meal_menu_api.Entities.Account;
+using meal_menu_api.Entities.Groups;
 using meal_menu_api.Models.Enums;
 
 namespace meal_menu_api.Entities
@@ -16,5 +16,7 @@ namespace meal_menu_api.Entities
         public GroupRole Role { get; set; }
 
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
+
+        public ICollection<GroupRecipeEntity> GroupMemberRecipes { get; set; } = [];
     }
 }

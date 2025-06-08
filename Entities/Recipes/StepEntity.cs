@@ -17,8 +17,8 @@ namespace meal_menu_api.Entities.Recipes
         [MinLength(2)]
         public string Description { get; set; } = null!;
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        public DateTime UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
     }
 }

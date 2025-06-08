@@ -6,6 +6,7 @@ using meal_menu_api.Entities.Dinners;
 using meal_menu_api.Entities.Recipes;
 using meal_menu_api.Filters;
 using meal_menu_api.Helpers;
+using meal_menu_api.Managers;
 using meal_menu_api.Models.Forms;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,10 +18,11 @@ namespace meal_menu_api.Controllers
     [ApiController]
     [UseApiKey]
     [Authorize(AuthenticationSchemes = "Bearer")]
-    public class DinnerScheduleController(DataContext dataContext, ToolBox toolBox) : ControllerBase
+    public class DinnerScheduleController(DataContext dataContext, ToolBox toolBox, DinnerScheduleManager dinnerScheduleManager) : ControllerBase
     {
         private readonly DataContext _dataContext = dataContext;
         private readonly ToolBox _toolBox = toolBox;
+        private readonly DinnerScheduleManager _dinnerScheduleManager = dinnerScheduleManager;
 
         [HttpPost]
         [Route("create")]
@@ -64,19 +66,7 @@ namespace meal_menu_api.Controllers
                 }
             }
 
-            // Uppdatera poängen för valda recept
-            foreach (var recipe in selectedRecipes)
-            {
-                recipe.RotationPoints += 25;
-                if (recipe.RotationPoints >= 100)
-                    recipe.RotationPoints = 0;
-            }
-
-            // Uppdatera poängen för övriga recept
-            foreach (var recipe in recipes.Except(selectedRecipes))
-            {
-                recipe.RotationPoints = Math.Min(recipe.RotationPoints + 25, 100);
-            }
+            _dinnerScheduleManager.UpdateRotationPoints(recipes, 25, 100, 0);
 
             await _dataContext.SaveChangesAsync();
 

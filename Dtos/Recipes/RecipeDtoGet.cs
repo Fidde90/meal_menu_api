@@ -14,10 +14,10 @@
 
         public DateTime UpdatedAt { get; set; }
 
-        public List<IngredientDto> Ingredients { get; set; } = new();
+        public List<IngredientDto> Ingredients { get; set; } = [];
         
-        public List<StepDto> Steps { get; set; } = new();
+        public List<StepDto> Steps { get; set; } = [];
         
-        public List<ImageDto> Images { get; set; } = new();
+        public List<ImageDto> Images { get; set; } = [];
     }
 }
