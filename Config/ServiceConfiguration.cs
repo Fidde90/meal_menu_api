@@ -14,6 +14,7 @@ namespace meal_menu_api.Config
             services.AddScoped<ToolBox>();
             services.AddScoped<UnitConversionManager>();
             services.AddScoped<ShoppingListManager>();
+            services.AddScoped<DinnerScheduleManager>();
         }
     }
 }

@@ -133,12 +133,6 @@ namespace meal_menu_api.Database.Context
                 .HasForeignKey(gm => gm.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<GroupRecipeEntity>()
-                .HasOne(x => x.RecipeOwner)
-                .WithMany(x => x.GroupMemberRecipes)
-                .HasForeignKey(x => new { x.OwnerGroupId, x.OwnerUserId })
-                .OnDelete(DeleteBehavior.Cascade);
-
             //INBJUDNINGAR
             modelBuilder.Entity<GroupInvitationEntity>()
                 .HasOne(i => i.Group)
@@ -156,7 +150,14 @@ namespace meal_menu_api.Database.Context
                 .WithMany()
                 .HasForeignKey(i => i.InvitedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
-  
+
+            //Grupprecept
+            modelBuilder.Entity<GroupRecipeEntity>()
+                .HasOne(x => x.RecipeOwner)
+                .WithMany(x => x.GroupMemberRecipes)
+                .HasForeignKey(x => new { x.GroupId, x.RecipeOwnerId })
+                .OnDelete(DeleteBehavior.Cascade);
+
             base.OnModelCreating(modelBuilder);
         }
     }

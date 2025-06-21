@@ -2,9 +2,11 @@
 using meal_menu_api.Dtos;
 using meal_menu_api.Dtos.Account;
 using meal_menu_api.Entities.Account;
+using meal_menu_api.Entities.Recipes;
 using meal_menu_api.Managers;
 using meal_menu_api.Mappers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -53,6 +55,15 @@ namespace meal_menu_api.Controllers
 
             return BadRequest();
         }
+
+        [HttpGet]
+        [Route("hej")]
+        public async Task<IActionResult> Hej()
+        {
+            return Ok("yo mannen!");
+        }
+
+
 
         [HttpPost]
         [Route("login")]

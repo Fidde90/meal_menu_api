@@ -1,5 +1,4 @@
 ﻿using meal_menu_api.Entities.Recipes;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 namespace meal_menu_api.Entities.Groups
@@ -9,9 +8,9 @@ namespace meal_menu_api.Entities.Groups
         [Key]
         public int Id { get; set; }
 
-        public int OwnerGroupId { get; set; }
+        public int GroupId { get; set; }
 
-        public string OwnerUserId { get; set; } = null!;
+        public string RecipeOwnerId { get; set; } = null!;
 
         public GroupMemberEntity RecipeOwner { get; set; } = null!;
 

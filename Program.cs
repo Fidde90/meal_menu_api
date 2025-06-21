@@ -55,18 +55,12 @@ namespace meal_menu_api
             // Cors
             builder.Services.AddCors(options =>
             {
-                //options.AddPolicy("Meal_menu_client", policy =>
-                //{
-                //    policy.WithOrigins("http://localhost:5173")
-                //          .AllowAnyHeader()
-                //          .AllowAnyMethod();
-                //});
-
                 options.AddPolicy("Meal_menu_client", policy =>
                 {
-                    policy.AllowAnyOrigin()
-                          .AllowAnyHeader()
-                          .AllowAnyMethod();
+                    policy
+                        .AllowAnyOrigin() // din frontend
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
                 });
             });
 
