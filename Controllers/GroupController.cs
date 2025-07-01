@@ -96,7 +96,7 @@ namespace meal_menu_api.Controllers
                     Id = group.Id,
                     Name = group.Name,
                     Description = group.Description,
-                    IconUrl = group.IconUrl,
+                    IconUrl = group.IconUrl?.Replace("\\", "/")!,
                     CreatedAt = group.CreatedAt,
                     UpdatedAt = group.UpdatedAt,
                 };
@@ -198,7 +198,7 @@ namespace meal_menu_api.Controllers
                         Id = group.Group.Id,
                         Name = group.Group.Name,
                         Description = group.Group.Description,
-                        IconUrl = group.Group.IconUrl,
+                        IconUrl = group.Group.IconUrl?.Replace("\\", "/")!,
                         CreatedAt = group.Group.CreatedAt,
                         UpdatedAt = group.Group.UpdatedAt,
                         Members = members

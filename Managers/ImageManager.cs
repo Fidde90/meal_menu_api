@@ -28,7 +28,7 @@ namespace meal_menu_api.Managers
         {
             if(Image != null)
             {
-                string filePath = Path.Combine("Images/groups", $"{id.ToString()}_" + Image.FileName);
+                string filePath = Path.Combine("Images\\groups", $"{id.ToString()}_" + Image.FileName);
                 using var stream = new FileStream(filePath, FileMode.Create);
                 await Image.CopyToAsync(stream);
                 return filePath;

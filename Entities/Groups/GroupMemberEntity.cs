@@ -17,6 +17,5 @@ namespace meal_menu_api.Entities
 
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
 
-        public ICollection<GroupRecipeEntity> GroupMemberRecipes { get; set; } = [];
     }
 }

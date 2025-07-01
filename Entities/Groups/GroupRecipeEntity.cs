@@ -1,5 +1,7 @@
-﻿using meal_menu_api.Entities.Recipes;
+﻿using meal_menu_api.Entities.Account;
+using meal_menu_api.Entities.Recipes;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace meal_menu_api.Entities.Groups
 {
@@ -10,9 +12,14 @@ namespace meal_menu_api.Entities.Groups
 
         public int GroupId { get; set; }
 
-        public string RecipeOwnerId { get; set; } = null!;
+        public GroupEntity Group { get; set; } = null!;
 
-        public GroupMemberEntity RecipeOwner { get; set; } = null!;
+        public string SharedByUserId { get; set; } = null!;
+
+        [ForeignKey(nameof(SharedByUserId))]
+        public AppUser SharedBy { get; set; } = null!;
+
+        public int RecipeId { get; set; }
 
         public string Name { get; set; } = null!;
 
@@ -20,9 +27,9 @@ namespace meal_menu_api.Entities.Groups
 
         public int Ppl { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public DateTime UpdatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public List<ImageEntity> Images { get; set; } = [];
 

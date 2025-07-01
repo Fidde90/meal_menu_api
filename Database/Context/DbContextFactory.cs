@@ -8,7 +8,7 @@ namespace meal_menu_api.Database.Context
         public DataContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<DataContext>();
-            optionsBuilder.UseSqlServer("Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\fredr\\Documents\\Meal_MenuDB.mdf;Integrated Security=True;Connect Timeout=30");
+            optionsBuilder.UseSqlServer("Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\meal_menu\\meal_menu_api\\Database\\Meal_MenuDB.mdf;Integrated Security=True;Connect Timeout=30");
 
             return new DataContext(optionsBuilder.Options);
         }
