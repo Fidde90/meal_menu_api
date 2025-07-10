@@ -86,6 +86,7 @@ namespace meal_menu_api.Controllers
             List<GroupRecipeEntity> groupRecipes = await _dataContext.GroupRecipes
                                                             .Include(gr => gr.Recipe)
                                                                 .ThenInclude(r => r.Ingredients)
+                                                                .ThenInclude(i => i.Unit)
                                                             .Include(gr => gr.Recipe)
                                                                 .ThenInclude(r => r.Images)
                                                             .Include(gr => gr.Recipe)

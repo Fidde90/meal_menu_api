@@ -14,20 +14,27 @@ namespace meal_menu_api.Mappers
             List<IngredientDto> listToReturn = [];
 
             foreach (var entity in entites)
-            {
-                IngredientDto newDto = new IngredientDto
-                {
-                    Name = entity.Name,
-                    Amount = entity.Amount,
-                    Unit = entity.Unit.Name,
-                    CreatedAt = entity.CreatedAt,
-                    UpdatedAt = entity.UpdatedAt,
-                };
-
-                listToReturn.Add(newDto);
-            }
-
+                listToReturn.Add(IngredientMapper.ToIngredientDto(entity));
+      
             return listToReturn;
+        }
+
+        public static IngredientDto ToIngredientDto(IngredientEntity entity)
+        {
+            if (entity == null)
+                return null!;
+
+            IngredientDto newIngredientDto = new()
+            {
+                Description = entity.Description ?? "",
+                Name = entity.Name ?? "",
+                Amount = entity.Amount,
+                Unit = entity.Unit.Name ?? "",
+                CreatedAt = entity.CreatedAt,
+                UpdatedAt = entity.UpdatedAt
+            };
+
+            return newIngredientDto;
         }
 
         public static IngredientEntity ToIngredientEntity (IngredientDto dto, RecipeEntity recipe, UnitEntity unit)

@@ -25,6 +25,9 @@ namespace meal_menu_api.Mappers
         }
         public static RecipeDtoGet ToRecipeDtoGet(RecipeEntity recipe)
         {
+            if (recipe == null)
+                return null!;
+
             RecipeDtoGet newRecipeDto = new()
             {
                 Id = recipe.Id,
@@ -33,6 +36,9 @@ namespace meal_menu_api.Mappers
                 Ppl = recipe.Ppl,
                 CreatedAt = recipe.CreatedAt,
                 UpdatedAt = recipe.UpdatedAt,
+                Ingredients = IngredientMapper.IngredientsToDtos(recipe.Ingredients),
+                Steps = StepMapper.StepsToDtos(recipe.Steps),
+                Images = ImageMapper.ImagesToDtos(recipe.Images)
             };
 
             return newRecipeDto;

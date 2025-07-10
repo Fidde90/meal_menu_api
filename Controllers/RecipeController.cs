@@ -100,10 +100,6 @@ namespace meal_menu_api.Controllers
                 foreach (RecipeEntity recipe in recipeEntities)
                 {
                     RecipeDtoGet newRecipeDto = RecipeMapper.ToRecipeDtoGet(recipe);
-                    newRecipeDto.Ingredients = IngredientMapper.IngredientsToDtos(recipe.Ingredients);
-                    newRecipeDto.Steps = StepMapper.StepsToDtos(recipe.Steps);
-                    newRecipeDto.Images = ImageMapper.ImagesToDtos(recipe.Images);
-
                     recipeDtos.Add(newRecipeDto);
                 }
 
