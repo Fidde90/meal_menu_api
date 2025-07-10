@@ -56,15 +56,6 @@ namespace meal_menu_api.Controllers
             return BadRequest();
         }
 
-        [HttpGet]
-        [Route("hej")]
-        public async Task<IActionResult> Hej()
-        {
-            return Ok("yo mannen!");
-        }
-
-
-
         [HttpPost]
         [Route("login")]
         public async Task<IActionResult> LoginUser(LoginDto loginDto)

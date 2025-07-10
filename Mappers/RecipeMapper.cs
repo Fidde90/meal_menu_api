@@ -46,16 +46,10 @@ namespace meal_menu_api.Mappers
             var newGroupRecipeDto = new GroupRecipeDto
             {
                 Id = groupRecipeEntity.Id,
-                SharedByName = groupRecipeEntity.SharedBy.FirstName + " " + groupRecipeEntity.SharedBy.LastName,
-                RecipeId = groupRecipeEntity.RecipeId,
-                Name = groupRecipeEntity.Name,
-                Description = groupRecipeEntity.Description,
-                Ppl = groupRecipeEntity.Ppl,
-                CreatedAt= groupRecipeEntity.CreatedAt,
-                UpdatedAt= groupRecipeEntity.UpdatedAt,
-                Images = ImageMapper.ImagesToDtos(groupRecipeEntity.Images) ?? [],
-                Ingredients = IngredientMapper.IngredientsToDtos(groupRecipeEntity.Ingredients) ?? [],
-                Steps = StepMapper.StepsToDtos(groupRecipeEntity.Steps) ?? []   
+                SharedByName = groupRecipeEntity.SharedByUser.FirstName + " " + groupRecipeEntity.SharedByUser.LastName,
+                RecipeDto = RecipeMapper.ToRecipeDtoGet(groupRecipeEntity.Recipe),
+                CreatedAt = groupRecipeEntity.CreatedAt,
+                UpdatedAt = groupRecipeEntity.UpdatedAt,
             };
 
             return newGroupRecipeDto;

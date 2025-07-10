@@ -151,6 +151,20 @@ namespace meal_menu_api.Database.Context
                 .HasForeignKey(i => i.InvitedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            //GRUPPRECEPT
+            modelBuilder.Entity<GroupRecipeEntity>()
+                .HasOne(gr => gr.Recipe)
+                .WithMany(r => r.SharedWithGroups)
+                .HasForeignKey(gr => gr.RecipeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<GroupRecipeEntity>()
+                .HasOne(gr => gr.SharedByUser)
+                .WithMany()
+                .HasForeignKey(gr => gr.SharedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
             base.OnModelCreating(modelBuilder);
         }
     }

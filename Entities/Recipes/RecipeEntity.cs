@@ -1,4 +1,5 @@
 ﻿using meal_menu_api.Entities.Account;
+using meal_menu_api.Entities.Groups;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -35,5 +36,7 @@ namespace meal_menu_api.Entities.Recipes
         public List<IngredientEntity> Ingredients { get; set; } = [];
 
         public List<StepEntity> Steps { get; set; } = [];
+
+        public ICollection<GroupRecipeEntity> SharedWithGroups { get; set; } = [];
     }
 }

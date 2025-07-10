@@ -10,31 +10,23 @@ namespace meal_menu_api.Entities.Groups
         [Key]
         public int Id { get; set; }
 
+        [ForeignKey(nameof(Group))]
         public int GroupId { get; set; }
 
         public GroupEntity Group { get; set; } = null!;
 
+        [ForeignKey(nameof(SharedByUser))]
         public string SharedByUserId { get; set; } = null!;
 
-        [ForeignKey(nameof(SharedByUserId))]
-        public AppUser SharedBy { get; set; } = null!;
+        public AppUser SharedByUser { get; set; } = null!;
 
+        [ForeignKey(nameof(Recipe))]
         public int RecipeId { get; set; }
 
-        public string Name { get; set; } = null!;
-
-        public string Description { get; set; } = null!;
-
-        public int Ppl { get; set; }
+        public RecipeEntity Recipe { get; set; } = null!;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
-        public List<ImageEntity> Images { get; set; } = [];
-
-        public List<IngredientEntity> Ingredients { get; set; } = [];
-
-        public List<StepEntity> Steps { get; set; } = [];
     }
 }

@@ -44,7 +44,11 @@ namespace meal_menu_api.Controllers
             if (!groups.Any())
                 return NotFound("no groups found");
 
-            RecipeEntity? recipe = await _dataContext.Recipes.FirstOrDefaultAsync(r => r.Id == requestModel.RecipeId);
+            RecipeEntity? recipe = await _dataContext.Recipes
+                                                        .Include(r => r.Ingredients)
+                                                        .Include(r => r.Images)
+                                                        .Include(r => r.Steps)
+                                                        .FirstOrDefaultAsync(r => r.Id == requestModel.RecipeId);
 
             if (recipe == null)
                 return NotFound("recipe not found");
@@ -62,17 +66,12 @@ namespace meal_menu_api.Controllers
                     GroupId = group.Id,
                     Group = group,
                     SharedByUserId = user.Id,
-                    SharedBy = user,
+                    SharedByUser = user,
                     RecipeId = recipe.Id,
-                    Name = recipe.Name,
-                    Description = recipe.Description,
-                    Ppl = recipe.Ppl,
-                    Images = recipe.Images,
-                    Ingredients = recipe.Ingredients,
-                    Steps = recipe.Steps
+                    Recipe = recipe
                 };
 
-                await _dataContext.GroupRecipes.AddAsync(newGroupRecipe);   
+                await _dataContext.GroupRecipes.AddAsync(newGroupRecipe);
             }
 
             await _dataContext.SaveChangesAsync();
@@ -85,17 +84,19 @@ namespace meal_menu_api.Controllers
         {
 
             List<GroupRecipeEntity> groupRecipes = await _dataContext.GroupRecipes
-                                      
-                                                            .Include(gr => gr.SharedBy)
-                                                                                  .Include(gr => gr.Ingredients)
-                                                            .Include(gr => gr.Steps)
-                                                            .Include(gr => gr.Images)
+                                                            .Include(gr => gr.Recipe)
+                                                                .ThenInclude(r => r.Ingredients)
+                                                            .Include(gr => gr.Recipe)
+                                                                .ThenInclude(r => r.Images)
+                                                            .Include(gr => gr.Recipe)
+                                                                .ThenInclude(r => r.Steps)
+                                                            .Include(gr => gr.SharedByUser)
                                                             .Where(gr => gr.GroupId == id)
                                                             .ToListAsync();
 
             List<GroupRecipeDto> groupRecipeDtos = RecipeMapper.MapFullGroupRecipeDtos(groupRecipes);
 
-            if(groupRecipeDtos.Count > 0)
+            if (groupRecipeDtos.Count > 0)
                 return Ok(groupRecipeDtos);
 
             return NotFound();
