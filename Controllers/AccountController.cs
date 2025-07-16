@@ -6,7 +6,6 @@ using meal_menu_api.Entities.Recipes;
 using meal_menu_api.Managers;
 using meal_menu_api.Mappers;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,13 +18,11 @@ namespace meal_menu_api.Controllers
     public class AccountController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
         private readonly DataContext _dataContext;
         private readonly AuthManager _authManager;
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, DataContext dataContext, AuthManager authManager)
+        public AccountController(UserManager<AppUser> userManager, DataContext dataContext, AuthManager authManager)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
             _dataContext = dataContext;
             _authManager = authManager;
         }
@@ -67,23 +64,50 @@ namespace meal_menu_api.Controllers
                 if (existingUser == null)
                     return Unauthorized();
 
-                var signIn = await _signInManager.PasswordSignInAsync(loginDto.Email, loginDto.Password, false, false);
+                var passwordValid = await _userManager.CheckPasswordAsync(existingUser, loginDto.Password);
 
-                if (!signIn.Succeeded)
-                    return BadRequest();
+                if (!passwordValid)
+                    return Unauthorized(); ;
 
                 string jwtToken = _authManager.GetToken(existingUser);
 
                 if (jwtToken != null)
                 {
+                    var cookieOptions = new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true, // sätt till true i produktion med HTTPS
+                        SameSite = SameSiteMode.None, //ändra sen till vpsen? olika domäner för apparna eller ha alla på samma?
+                        Expires = DateTime.UtcNow.AddDays(60)
+                    };
+
+                    Response.Cookies.Append("jwtToken", jwtToken, cookieOptions);
+
                     var userDto = UserMapper.ToUserDto(existingUser);
                     existingUser.LastLogin = DateTime.UtcNow;
 
                     await _userManager.UpdateAsync(existingUser);
-                    return Ok(new { User = userDto, Token = jwtToken });
+                    return Ok(new { User = userDto });
                 }
             }
             return BadRequest();
+        }
+
+        [HttpPost]
+        [Route("logout")]
+        public IActionResult Logout()
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true, // eller true om du kör HTTPS
+                SameSite = SameSiteMode.None, // eller den inställning du använde vid inloggning
+                Expires = DateTime.UtcNow.AddDays(-1), // sätter ett utgånget datum
+            };
+
+            Response.Cookies.Delete("jwtToken", cookieOptions);
+
+            return Ok();
         }
 
         [HttpPost]

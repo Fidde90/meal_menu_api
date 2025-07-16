@@ -1,11 +1,13 @@
-using Microsoft.EntityFrameworkCore;
 using meal_menu_api.Config;
-using System.Text.Json.Serialization;
-using meal_menu_api.Filters;
-using meal_menu_api.Database.Seeders;
 using meal_menu_api.Database.Context;
-using Microsoft.Extensions.FileProviders;
+using meal_menu_api.Database.Seeders;
 using meal_menu_api.Entities.Account;
+using meal_menu_api.Filters;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
+using System.Text.Json.Serialization;
 
 
 namespace meal_menu_api
@@ -42,7 +44,7 @@ namespace meal_menu_api
             //builder.Services.AddControllers(options => { options.Filters.Add<UseApiKeyAttribute>();});
        
             // Identity user regler
-            builder.Services.AddDefaultIdentity<AppUser>(x => {
+            builder.Services.AddIdentityCore<AppUser>(x => {
                 x.SignIn.RequireConfirmedAccount = false;
                 x.Password.RequiredLength = 3;
                 x.User.RequireUniqueEmail = false; //kanske? men då fungerarju inte conflict grejen
@@ -50,7 +52,8 @@ namespace meal_menu_api
                 x.Password.RequireNonAlphanumeric = false;
                 x.Password.RequireUppercase = false;
                 x.Password.RequireLowercase = false;
-            }).AddEntityFrameworkStores<DataContext>();
+            })
+            .AddEntityFrameworkStores<DataContext>();
 
             // Cors
             builder.Services.AddCors(options =>
@@ -58,9 +61,10 @@ namespace meal_menu_api
                 options.AddPolicy("Meal_menu_client", policy =>
                 {
                     policy
-                        .AllowAnyOrigin() // din frontend
+                        .WithOrigins("http://localhost:5173") // din frontend
                         .AllowAnyHeader()
-                        .AllowAnyMethod();
+                        .AllowAnyMethod()
+                        .AllowCredentials();
                 });
             });
 
@@ -79,7 +83,6 @@ namespace meal_menu_api
                 FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Images")),
                 RequestPath = "/Images"  // URL-prefix som du använder för att komma åt bilder
             });
-
 
             if (app.Environment.IsDevelopment())
             {

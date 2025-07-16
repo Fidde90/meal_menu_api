@@ -19,10 +19,10 @@ namespace meal_menu_api.Controllers
         }
 
         [HttpGet]
-        [Route("get")]
+        [Route("me")]
         [UseApiKey]
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> GetUser()
+        [Authorize]
+        public async Task<IActionResult> GeCurrenttUser()
         {
             AppUser? user = await _userManager.GetUserAsync(User);
 
