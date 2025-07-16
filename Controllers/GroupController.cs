@@ -160,7 +160,6 @@ namespace meal_menu_api.Controllers
         }
 
         [HttpGet]
-        [Route("get")]
         public async Task<IActionResult> GetAllGroups()
         {
             var user = _dataContext.Users.FirstOrDefault(u => u.Email == User.Identity!.Name);

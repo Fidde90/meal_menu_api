@@ -101,29 +101,24 @@ namespace meal_menu_api.Controllers
         [Route("get-recent")]
         public async Task<IActionResult> GetRecentGroupRecipes(int groupId, int n)
         {
-            List<GroupRecipeEntity> filterdGorupRecipes = await _dataContext.GroupRecipes
-                                                                                     .OrderByDescending(gr => gr.CreatedAt)
-                                                                                     .Take(n)
-                                                                                     .Where(gr => gr.GroupId == groupId)
-                                                                                     .ToListAsync();
+            List<GroupRecipeEntity> filterdGroupRecipes = await _dataContext.GroupRecipes
+                                                                                    .Include(gr => gr.Recipe)
+                                                                                        .ThenInclude(r => r.Ingredients)
+                                                                                        .ThenInclude(i => i.Unit)
+                                                                                    .Include(gr => gr.Recipe)
+                                                                                        .ThenInclude(r => r.Images)
+                                                                                    .Include(gr => gr.Recipe)
+                                                                                        .ThenInclude(r => r.Steps)
+                                                                                    .Include(gr => gr.SharedByUser)
+                                                                                    .Where(gr => gr.GroupId == groupId)
+                                                                                    .OrderByDescending(gr => gr.CreatedAt)
+                                                                                    .Take(n)                                                                          
+                                                                                    .ToListAsync();
 
-            if (filterdGorupRecipes.Count < 1)
+            if (filterdGroupRecipes.Count < 1)
                 return NotFound();
 
-            List<int> recipeIds = filterdGorupRecipes.Select(r => r.RecipeId).Distinct().ToList();
-
-            List<RecipeEntity> recipeEntities = await _dataContext.Recipes
-                                                                  .Include(r => r.Ingredients)
-                                                                    .ThenInclude(i => i.Unit)
-                                                                  .Include(r => r.Steps)
-                                                                  .Include(r => r.Images)
-                                                                  .Where(r => recipeIds.Contains(r.Id))
-                                                                  .ToListAsync();
-
-            if (recipeEntities.Count < 1)
-                return NotFound();
-
-            List<RecipeDtoGet> recentRecipesDtos = RecipeMapper.ToRecipeDtos(recipeEntities);
+            List<GroupRecipeDto> recentRecipesDtos = RecipeMapper.ToGroupRecipeDtos(filterdGroupRecipes);
 
             return Ok(recentRecipesDtos);
         }
