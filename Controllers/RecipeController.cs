@@ -30,7 +30,7 @@ namespace meal_menu_api.Controllers
 
         [HttpPost]
         [Route("create")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        [Authorize]
         public async Task<IActionResult> CreateRecipe(RecipeDtoCreate recipeDto)
         {
             if (!ModelState.IsValid)
@@ -111,7 +111,7 @@ namespace meal_menu_api.Controllers
 
         [HttpGet]
         [Route("get-recipe/{id}")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        [Authorize]
         public async Task<IActionResult> GetRecipe(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -136,7 +136,7 @@ namespace meal_menu_api.Controllers
 
         [HttpDelete]
         [Route("delete/{id}")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        [Authorize]
         public async Task<IActionResult> DeleteRecipe(string id)
         {
             RecipeEntity? recipeToDelete = await _dataContext.Recipes.FirstOrDefaultAsync(r => r.Id.ToString() == id) ?? null;
@@ -153,13 +153,19 @@ namespace meal_menu_api.Controllers
             return NotFound();
         }
 
-        [HttpPut]
-        [Route("update/{id}")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> UpdateRecipe(string id, RecipeDtoCreate recipeDto)
+        [HttpPut("{recipeId}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateRecipe(string recipeId, RecipeDtoCreate recipeDto)
         {
             AppUser? user = await _userManager.FindByEmailAsync(User!.Identity!.Name!);
-            RecipeEntity? recipeEntity = await _dataContext.Recipes.FirstOrDefaultAsync(r => r.Id.ToString() == id) ?? null;
+            RecipeEntity? recipeEntity = await _dataContext.Recipes.FirstOrDefaultAsync(r => r.Id.ToString() == recipeId);
+
+            if (user == null || recipeEntity == null)
+                return NotFound();
+
+            if (recipeEntity.UserId != user.Id)
+                return Forbid();
+
             List<IngredientDto> ingredientDtos = JsonConvert.DeserializeObject<List<IngredientDto>>(recipeDto.Ingredients!)!;
             List<StepDto> stepDtos = JsonConvert.DeserializeObject<List<StepDto>>(recipeDto.Steps!)!;
 

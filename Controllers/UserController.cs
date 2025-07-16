@@ -27,7 +27,7 @@ namespace meal_menu_api.Controllers
             AppUser? user = await _userManager.GetUserAsync(User);
 
             if (user != null)
-                return Ok(new {user});
+                return Ok(new { user });
 
             return NotFound();
         }
