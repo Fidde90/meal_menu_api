@@ -79,7 +79,7 @@ namespace meal_menu_api.Controllers
             return Ok();
         }
 
-        [HttpGet]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetAllGroupRecipes(int id)
         {
 
@@ -94,6 +94,8 @@ namespace meal_menu_api.Controllers
                                                             .Include(gr => gr.SharedByUser)
                                                             .Where(gr => gr.GroupId == id)
                                                             .ToListAsync();
+            if (groupRecipes.Count < 1)
+                return NotFound();
 
             List<GroupRecipeDto> groupRecipeDtos = RecipeMapper.MapFullGroupRecipeDtos(groupRecipes);
 
@@ -101,7 +103,6 @@ namespace meal_menu_api.Controllers
                 return Ok(groupRecipeDtos);
 
             return NotFound();
-
         }
     }
 }
