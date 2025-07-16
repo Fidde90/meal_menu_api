@@ -99,11 +99,11 @@ namespace meal_menu_api.Controllers
 
         [HttpGet]
         [Route("get-recent")]
-        public async Task<IActionResult> GetRecentGroupRecipes(int groupId, int numberOfRecipes)
+        public async Task<IActionResult> GetRecentGroupRecipes(int groupId, int n)
         {
             List<GroupRecipeEntity> filterdGorupRecipes = await _dataContext.GroupRecipes
                                                                                      .OrderByDescending(gr => gr.CreatedAt)
-                                                                                     .Take(numberOfRecipes)
+                                                                                     .Take(n)
                                                                                      .Where(gr => gr.GroupId == groupId)
                                                                                      .ToListAsync();
 

@@ -73,8 +73,7 @@ namespace meal_menu_api.Controllers
             return Ok();
         }
 
-        [HttpGet]
-        [Route("get/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetGroup(string id)
         {
             if (!string.IsNullOrEmpty(id))
