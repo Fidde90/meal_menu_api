@@ -46,6 +46,21 @@ namespace meal_menu_api.Mappers
             return newRecipeDto;
         }
 
+        public static List<RecipeDtoGet> ToRecipeDtos(List<RecipeEntity> recipes)
+        {
+            if (recipes.Count < 1)
+                return [];
+
+            List<RecipeDtoGet> dtos = [];
+
+            foreach (RecipeEntity recipe in recipes)
+            {
+                dtos.Add(ToRecipeDtoGet(recipe));
+            }
+
+            return dtos;
+        }
+
         public static GroupRecipeEntity ToGroupRecipeEntity(GroupEntity group, RecipeEntity recipe, AppUser user)
         {
             if (group == null || recipe == null || user == null)

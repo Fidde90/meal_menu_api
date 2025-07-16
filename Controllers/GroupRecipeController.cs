@@ -1,4 +1,5 @@
 ﻿using meal_menu_api.Database.Context;
+using meal_menu_api.Dtos;
 using meal_menu_api.Dtos.Groups;
 using meal_menu_api.Entities;
 using meal_menu_api.Entities.Account;
@@ -94,6 +95,37 @@ namespace meal_menu_api.Controllers
                 return Ok(groupRecipeDtos);
 
             return NotFound();
+        }
+
+        [HttpGet]
+        [Route("get-recent")]
+        public async Task<IActionResult> GetRecentGroupRecipes(int groupId, int numberOfRecipes)
+        {
+            List<GroupRecipeEntity> filterdGorupRecipes = await _dataContext.GroupRecipes
+                                                                                     .OrderByDescending(gr => gr.CreatedAt)
+                                                                                     .Take(numberOfRecipes)
+                                                                                     .Where(gr => gr.GroupId == groupId)
+                                                                                     .ToListAsync();
+
+            if (filterdGorupRecipes.Count < 1)
+                return NotFound();
+
+            List<int> recipeIds = filterdGorupRecipes.Select(r => r.RecipeId).Distinct().ToList();
+
+            List<RecipeEntity> recipeEntities = await _dataContext.Recipes
+                                                                  .Include(r => r.Ingredients)
+                                                                    .ThenInclude(i => i.Unit)
+                                                                  .Include(r => r.Steps)
+                                                                  .Include(r => r.Images)
+                                                                  .Where(r => recipeIds.Contains(r.Id))
+                                                                  .ToListAsync();
+
+            if (recipeEntities.Count < 1)
+                return NotFound();
+
+            List<RecipeDtoGet> recentRecipesDtos = RecipeMapper.ToRecipeDtos(recipeEntities);
+
+            return Ok(recentRecipesDtos);
         }
     }
 }
