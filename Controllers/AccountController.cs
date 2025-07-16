@@ -2,7 +2,6 @@
 using meal_menu_api.Dtos;
 using meal_menu_api.Dtos.Account;
 using meal_menu_api.Entities.Account;
-using meal_menu_api.Entities.Recipes;
 using meal_menu_api.Managers;
 using meal_menu_api.Mappers;
 using Microsoft.AspNetCore.Authorization;
@@ -100,9 +99,9 @@ namespace meal_menu_api.Controllers
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true, // eller true om du kör HTTPS
-                SameSite = SameSiteMode.None, // eller den inställning du använde vid inloggning
-                Expires = DateTime.UtcNow.AddDays(-1), // sätter ett utgånget datum
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(-1),
             };
 
             Response.Cookies.Delete("jwtToken", cookieOptions);
