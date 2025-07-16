@@ -61,17 +61,8 @@ namespace meal_menu_api.Controllers
                 if (alreadyInGroup != null)
                     continue;
 
-                var newGroupRecipe = new GroupRecipeEntity
-                {
-                    GroupId = group.Id,
-                    Group = group,
-                    SharedByUserId = user.Id,
-                    SharedByUser = user,
-                    RecipeId = recipe.Id,
-                    Recipe = recipe
-                };
-
-                await _dataContext.GroupRecipes.AddAsync(newGroupRecipe);
+                var newGroupRecipeEntity = RecipeMapper.ToGroupRecipeEntity(group, recipe, user);
+                await _dataContext.GroupRecipes.AddAsync(newGroupRecipeEntity);
             }
 
             await _dataContext.SaveChangesAsync();
@@ -97,7 +88,7 @@ namespace meal_menu_api.Controllers
             if (groupRecipes.Count < 1)
                 return NotFound();
 
-            List<GroupRecipeDto> groupRecipeDtos = RecipeMapper.MapFullGroupRecipeDtos(groupRecipes);
+            List<GroupRecipeDto> groupRecipeDtos = RecipeMapper.ToGroupRecipeDtos(groupRecipes);
 
             if (groupRecipeDtos.Count > 0)
                 return Ok(groupRecipeDtos);

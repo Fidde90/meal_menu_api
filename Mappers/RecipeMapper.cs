@@ -1,5 +1,6 @@
 ﻿using meal_menu_api.Dtos;
 using meal_menu_api.Dtos.Groups;
+using meal_menu_api.Entities;
 using meal_menu_api.Entities.Account;
 using meal_menu_api.Entities.Groups;
 using meal_menu_api.Entities.Recipes;
@@ -23,6 +24,7 @@ namespace meal_menu_api.Mappers
 
             return newRecipe;
         }
+
         public static RecipeDtoGet ToRecipeDtoGet(RecipeEntity recipe)
         {
             if (recipe == null)
@@ -44,7 +46,25 @@ namespace meal_menu_api.Mappers
             return newRecipeDto;
         }
 
-        public static GroupRecipeDto MapFullGroupRecipeDto(GroupRecipeEntity groupRecipeEntity)
+        public static GroupRecipeEntity ToGroupRecipeEntity(GroupEntity group, RecipeEntity recipe, AppUser user)
+        {
+            if (group == null || recipe == null || user == null)
+                return null!;
+
+            var newGroupRecipeEntiy = new GroupRecipeEntity
+            {
+                GroupId = group.Id,
+                Group = group,
+                SharedByUserId = user.Id,
+                SharedByUser = user,
+                RecipeId = recipe.Id,
+                Recipe = recipe
+            };
+
+            return newGroupRecipeEntiy;
+        }
+
+        public static GroupRecipeDto ToGroupRecipeDto(GroupRecipeEntity groupRecipeEntity)
         {
             if (groupRecipeEntity == null)
                 return null!;
@@ -61,7 +81,7 @@ namespace meal_menu_api.Mappers
             return newGroupRecipeDto;
         }
 
-        public static List<GroupRecipeDto> MapFullGroupRecipeDtos(List<GroupRecipeEntity> entityList)
+        public static List<GroupRecipeDto> ToGroupRecipeDtos(List<GroupRecipeEntity> entityList)
         {
             if (entityList.Count < 1)
                 return [];
@@ -70,7 +90,7 @@ namespace meal_menu_api.Mappers
 
             foreach (var entity in entityList)
             {
-                var newDto = RecipeMapper.MapFullGroupRecipeDto(entity);
+                var newDto = RecipeMapper.ToGroupRecipeDto(entity);
                 returnList.Add(newDto);
             }
 
