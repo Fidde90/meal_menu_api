@@ -33,9 +33,8 @@ namespace meal_menu_api.Controllers
         }
 
         [HttpPut]
-        [Route("update")]
         [UseApiKey]
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        [Authorize]
         public async Task<IActionResult> UpdateUser(UpdateUserDto updateUserDto)
         {
             if (!ModelState.IsValid)

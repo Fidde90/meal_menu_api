@@ -29,7 +29,6 @@ namespace meal_menu_api.Controllers
         }
 
         [HttpPost]
-        [Route("create")]
         [Authorize]
         public async Task<IActionResult> CreateRecipe(RecipeDtoCreate recipeDto)
         {
@@ -76,8 +75,7 @@ namespace meal_menu_api.Controllers
         }
 
         [HttpGet]
-        [Route("get-all")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        [Authorize]
         public async Task<IActionResult> GetAllRecipes()
         {
             AppUser? user = await _userManager.GetUserAsync(User);
@@ -110,7 +108,7 @@ namespace meal_menu_api.Controllers
         }
 
         [HttpGet]
-        [Route("get-recipe/{id}")]
+        [Route("{id}")]
         [Authorize]
         public async Task<IActionResult> GetRecipe(string id)
         {
@@ -127,15 +125,11 @@ namespace meal_menu_api.Controllers
                 return NotFound();
 
             RecipeDtoGet newRecipeDto = RecipeMapper.ToRecipeDtoGet(recipe);
-            newRecipeDto.Ingredients = IngredientMapper.IngredientsToDtos(recipe.Ingredients);
-            newRecipeDto.Steps = StepMapper.StepsToDtos(recipe.Steps);
-            newRecipeDto.Images = ImageMapper.ImagesToDtos(recipe.Images);
 
             return Ok(newRecipeDto);
         }
 
-        [HttpDelete]
-        [Route("delete/{id}")]
+        [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteRecipe(string id)
         {
@@ -153,22 +147,27 @@ namespace meal_menu_api.Controllers
             return NotFound();
         }
 
-        [HttpPut("{recipeId}")]
+        [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateRecipe(string recipeId, RecipeDtoCreate recipeDto)
+        public async Task<IActionResult> UpdateRecipe(string id, RecipeDtoCreate recipeDto)
         {
+
+            //hämtar användare och receptet
             AppUser? user = await _userManager.FindByEmailAsync(User!.Identity!.Name!);
-            RecipeEntity? recipeEntity = await _dataContext.Recipes.FirstOrDefaultAsync(r => r.Id.ToString() == recipeId);
+            RecipeEntity? recipeEntity = await _dataContext.Recipes.FirstOrDefaultAsync(r => r.Id.ToString() == id);
 
             if (user == null || recipeEntity == null)
                 return NotFound();
 
+            //säkerhets kontroll 
             if (recipeEntity.UserId != user.Id)
                 return Forbid();
 
+            //deserializerar listorna
             List<IngredientDto> ingredientDtos = JsonConvert.DeserializeObject<List<IngredientDto>>(recipeDto.Ingredients!)!;
             List<StepDto> stepDtos = JsonConvert.DeserializeObject<List<StepDto>>(recipeDto.Steps!)!;
 
+            //uppdaterar basic info
             recipeEntity!.Name = recipeDto.RecipeName;
             recipeEntity.Description = recipeDto.RecipeDescription;
             recipeEntity.Ppl = recipeDto.Ppl;

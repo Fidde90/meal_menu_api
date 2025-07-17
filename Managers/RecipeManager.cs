@@ -52,6 +52,7 @@ namespace meal_menu_api.Managers
             if (ingredientEntities == null)
                 return;
 
+            //delete ingredients not in incoming list
             var ingredientsToRemove = ingredientEntities
                 .Where(entity => !ingredientDtoList.Any(dto => dto.Id == entity.Id))
                 .ToList();

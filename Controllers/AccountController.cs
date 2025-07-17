@@ -110,7 +110,7 @@ namespace meal_menu_api.Controllers
 
         [HttpPost]
         [Route("change-password")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        [Authorize]
         public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
         {
             if (!ModelState.IsValid)
@@ -134,7 +134,7 @@ namespace meal_menu_api.Controllers
         }
 
         [HttpPost("delete")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        [Authorize]
         public async Task<IActionResult> DeleteAccount(DeleteAccountDto deleteAccountdto)
         {
             if (!ModelState.IsValid)
