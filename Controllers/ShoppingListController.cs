@@ -1,22 +1,15 @@
-﻿using meal_menu_api.Database.Context;
-using meal_menu_api.Dtos;
-using meal_menu_api.Entities;
+﻿using meal_menu_api.Dtos;
 using meal_menu_api.Filters;
 using meal_menu_api.Managers;
-using meal_menu_api.Models;
-using meal_menu_api.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 
 namespace meal_menu_api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [UseApiKey]
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize]
     public class ShoppingListController : ControllerBase
     {
         private readonly ShoppingListManager _shoppingListManager;

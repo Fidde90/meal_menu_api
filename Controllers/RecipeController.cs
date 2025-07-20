@@ -15,6 +15,7 @@ namespace meal_menu_api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class RecipeController : ControllerBase
     {
         private readonly DataContext _dataContext;
@@ -29,7 +30,6 @@ namespace meal_menu_api.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> CreateRecipe(RecipeDtoCreate recipeDto)
         {
             if (!ModelState.IsValid)
@@ -75,7 +75,6 @@ namespace meal_menu_api.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetAllRecipes()
         {
             AppUser? user = await _userManager.GetUserAsync(User);
@@ -109,7 +108,6 @@ namespace meal_menu_api.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        [Authorize]
         public async Task<IActionResult> GetRecipe(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -130,7 +128,6 @@ namespace meal_menu_api.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> DeleteRecipe(string id)
         {
             RecipeEntity? recipeToDelete = await _dataContext.Recipes.FirstOrDefaultAsync(r => r.Id.ToString() == id) ?? null;
@@ -148,7 +145,6 @@ namespace meal_menu_api.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize]
         public async Task<IActionResult> UpdateRecipe(string id, RecipeDtoCreate recipeDto)
         {
 

@@ -9,21 +9,25 @@ using meal_menu_api.Filters;
 using meal_menu_api.Mappers;
 using meal_menu_api.Models.Forms;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace meal_menu_api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [UseApiKey]
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize]
     public class GroupRecipeController : ControllerBase
     {
         private readonly DataContext _dataContext;
-        public GroupRecipeController(DataContext dataContext)
+        private readonly UserManager<AppUser> _userManager;
+        public GroupRecipeController(DataContext dataContext, UserManager<AppUser> userManager)
         {
             _dataContext = dataContext;
+            _userManager = userManager;
         }
 
         [HttpPost]
@@ -32,34 +36,48 @@ namespace meal_menu_api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            AppUser? user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == User.Identity!.Name);
+            AppUser? user = await _userManager.GetUserAsync(User);
 
             if (user == null)
                 return Unauthorized();
 
-            List<GroupEntity> groups = await _dataContext.Groups
-                                                            .Include(g => g.Members.Where(m => m.UserId == user.Id))
-                                                            .Where(g => requestModel.GroupIds.Contains(g.Id))
-                                                            .ToListAsync();
-
-            if (!groups.Any())
-                return NotFound("no groups found");
-
             RecipeEntity? recipe = await _dataContext.Recipes
-                                                        .Include(r => r.Ingredients)
-                                                        .Include(r => r.Images)
-                                                        .Include(r => r.Steps)
-                                                        .FirstOrDefaultAsync(r => r.Id == requestModel.RecipeId);
+                                                      .Include(r => r.Ingredients)
+                                                      .Include(r => r.Images)
+                                                      .Include(r => r.Steps)
+                                                      .FirstOrDefaultAsync(r => r.Id == requestModel.RecipeId);
 
             if (recipe == null)
                 return NotFound("recipe not found");
 
-            foreach (GroupEntity group in groups)
-            {
-                var groupRecipes = await _dataContext.GroupRecipes.Where(gr => gr.GroupId == group.Id).ToListAsync();
-                var alreadyInGroup = groupRecipes.FirstOrDefault(gr => gr.RecipeId == recipe.Id);
+            //alla användarens grupper
+            List<GroupEntity> allUserGroups = await _dataContext.Groups
+                .Include(g => g.Members.Where(m => m.UserId == user.Id))
+                .Include(g => g.GroupRecipes)
+                .ToListAsync();
 
-                if (alreadyInGroup != null)
+            if (!allUserGroups.Any())
+                return NotFound("no user groups found");
+
+            // 2. Filtrera ut grupper där receptet ska tas bort
+            var groupRecipesToRemove = allUserGroups
+                .Where(group => !requestModel.GroupIds.Contains(group.Id)) // inte med i listan, alla grupper som inte var med i dto:n
+                .SelectMany(group => group.GroupRecipes
+                    .Where(gr => gr.RecipeId == requestModel.RecipeId))    // men bara som har receptet
+                .ToList();
+
+            // 3. Ta bort recepten från dessa grupper         
+            if (groupRecipesToRemove.Count > 0)
+            {
+                _dataContext.GroupRecipes.RemoveRange(groupRecipesToRemove);
+                await _dataContext.SaveChangesAsync();
+            }
+
+            var groupRecipesToAdd = allUserGroups.Where(group => requestModel.GroupIds.Contains(group.Id));
+
+            foreach (GroupEntity group in groupRecipesToAdd)
+            {
+                if (group.GroupRecipes.Any(x => x.RecipeId == recipe.Id))
                     continue;
 
                 var newGroupRecipeEntity = RecipeMapper.ToGroupRecipeEntity(group, recipe, user);
@@ -121,6 +139,31 @@ namespace meal_menu_api.Controllers
             List<GroupRecipeDto> recentRecipesDtos = RecipeMapper.ToGroupRecipeDtos(filterdGroupRecipes);
 
             return Ok(recentRecipesDtos);
+        }
+
+        [HttpGet]
+        [Route("share-with-group/{recipeId}")]
+        public async Task<IActionResult> GetGroupsWithRecipeSharedStatus(string recipeId)
+        {
+            if (string.IsNullOrEmpty(recipeId))
+                return BadRequest();
+
+            AppUser? user = await _userManager.GetUserAsync(User!);
+
+            if (user == null)
+                return Unauthorized("user not found");
+
+            var result = await _dataContext.GroupMembers
+                                                    .Where(gm => gm.UserId == user.Id)
+                                                    .Select(gm => new RecipeInGroupDto
+                                                    {
+                                                        GroupId = gm.Group.Id,
+                                                        GroupName = gm.Group.Name,
+                                                        RecipeInGroup = gm.Group.GroupRecipes.Any(gr => gr.RecipeId.ToString() == recipeId)
+                                                    })
+                                                    .ToListAsync();
+
+            return Ok(result);
         }
     }
 }

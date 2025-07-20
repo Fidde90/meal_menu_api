@@ -49,3 +49,6 @@ desktop.ini
 #DB files
 *.mdf
 *.ldf
+
+# Pictures
+/Images

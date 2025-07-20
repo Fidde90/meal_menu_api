@@ -16,7 +16,7 @@ namespace meal_menu_api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [UseApiKey]
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize]
     public class GroupController : ControllerBase
     {
         private readonly DataContext _dataContext;
@@ -169,6 +169,7 @@ namespace meal_menu_api.Controllers
 
             List<GroupMemberEntity> groupsMember = await _dataContext.GroupMembers.Where(m => m.UserId == user.Id)
                                                                                             .Include(m => m.Group)
+                                                                                             
                                                                                             .ToListAsync();
             UserGroupsDto groups = new();
 

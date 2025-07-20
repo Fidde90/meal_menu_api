@@ -13,7 +13,7 @@ namespace meal_menu_api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [UseApiKey]
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize]
     public class InvitationController : ControllerBase
     {
         private readonly DataContext _dataContext;

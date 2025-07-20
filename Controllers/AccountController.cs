@@ -12,7 +12,6 @@ namespace meal_menu_api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-
     public class AccountController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;

@@ -1,6 +1,5 @@
 ﻿using meal_menu_api.Database.Context;
 using meal_menu_api.Dtos;
-using meal_menu_api.Entities;
 using meal_menu_api.Entities.Account;
 using meal_menu_api.Entities.Dinners;
 using meal_menu_api.Entities.Recipes;
@@ -17,7 +16,7 @@ namespace meal_menu_api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [UseApiKey]
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize]
     public class DinnerScheduleController(DataContext dataContext, ToolBox toolBox, DinnerScheduleManager dinnerScheduleManager) : ControllerBase
     {
         private readonly DataContext _dataContext = dataContext;

@@ -9,6 +9,8 @@ namespace meal_menu_api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [UseApiKey]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
@@ -20,8 +22,6 @@ namespace meal_menu_api.Controllers
 
         [HttpGet]
         [Route("me")]
-        [UseApiKey]
-        [Authorize]
         public async Task<IActionResult> GeCurrenttUser()
         {
             AppUser? user = await _userManager.GetUserAsync(User);
@@ -33,8 +33,6 @@ namespace meal_menu_api.Controllers
         }
 
         [HttpPut]
-        [UseApiKey]
-        [Authorize]
         public async Task<IActionResult> UpdateUser(UpdateUserDto updateUserDto)
         {
             if (!ModelState.IsValid)
