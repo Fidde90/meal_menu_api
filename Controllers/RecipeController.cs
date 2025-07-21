@@ -51,8 +51,8 @@ namespace meal_menu_api.Controllers
                 _dataContext.Recipes.Add(newRecipe);
                 await _dataContext.SaveChangesAsync();
 
-                IEnumerable<IngredientDto> ingredients = JsonConvert.DeserializeObject<IEnumerable<IngredientDto>>(recipeDto.Ingredients!)!;
-                IEnumerable<StepDto> steps = JsonConvert.DeserializeObject<IEnumerable<StepDto>>(recipeDto.Steps!)!;
+                List<IngredientDto> ingredients = JsonConvert.DeserializeObject<List<IngredientDto>>(recipeDto.Ingredients!)!;
+                List<StepDto> steps = JsonConvert.DeserializeObject<List<StepDto>>(recipeDto.Steps!)!;
 
                 if (ingredients != null && ingredients.Any())
                     await _recipeManager.SaveIngredients(ingredients!, newRecipe);

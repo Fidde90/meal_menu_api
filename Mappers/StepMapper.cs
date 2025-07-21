@@ -17,6 +17,18 @@ namespace meal_menu_api.Mappers
             return newStep;
         }
 
+        public static StepEntity ToStepEntity(StepEntity step, RecipeEntity recipe)
+        {
+            StepEntity newStep = new StepEntity
+            {
+                Description = step!.Description,
+                RecipeId = recipe.Id,
+                Recipe = recipe,
+            };
+
+            return newStep;
+        }
+
         public static List<StepDto> StepsToDtos(List<StepEntity> entites)
         {
             if (entites.Count <= 0)

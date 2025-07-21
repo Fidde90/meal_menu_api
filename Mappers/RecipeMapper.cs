@@ -1,9 +1,12 @@
-﻿using meal_menu_api.Dtos;
+﻿using meal_menu_api.Database.Context;
+using meal_menu_api.Dtos;
 using meal_menu_api.Dtos.Groups;
 using meal_menu_api.Entities;
 using meal_menu_api.Entities.Account;
 using meal_menu_api.Entities.Groups;
 using meal_menu_api.Entities.Recipes;
+using Microsoft.AspNetCore.Http.HttpResults;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace meal_menu_api.Mappers
 {
@@ -16,6 +19,22 @@ namespace meal_menu_api.Mappers
                 Name = recipeDto.RecipeName!,
                 Description = recipeDto.RecipeDescription!,
                 Ppl = recipeDto.Ppl,
+                UserId = user.Id,
+                User = user,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            };
+
+            return newRecipe;
+        }
+
+        public static RecipeEntity ToRecipeEntity(RecipeEntity recipe, AppUser user)
+        {
+            RecipeEntity newRecipe = new RecipeEntity
+            {
+                Name = recipe.Name,
+                Description = recipe.Description,
+                Ppl = recipe.Ppl,
                 UserId = user.Id,
                 User = user,
                 CreatedAt = DateTime.Now,
@@ -120,3 +139,4 @@ namespace meal_menu_api.Mappers
         }
     }
 }
+

@@ -1,9 +1,11 @@
 ﻿using meal_menu_api.Database.Context;
 using meal_menu_api.Dtos;
 using meal_menu_api.Entities;
+using meal_menu_api.Entities.Account;
 using meal_menu_api.Entities.Recipes;
 using meal_menu_api.Mappers;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace meal_menu_api.Managers
@@ -11,13 +13,15 @@ namespace meal_menu_api.Managers
     public class RecipeManager
     {
         private readonly DataContext _datacontext;
+        private readonly ImageManager _imagemanager;
 
-        public RecipeManager(DataContext datacontext)
+        public RecipeManager(DataContext datacontext, ImageManager imageManager)
         {
-           _datacontext = datacontext; 
+            _datacontext = datacontext;
+            _imagemanager = imageManager;
         }
 
-        public async Task SaveIngredients(IEnumerable<IngredientDto> list, RecipeEntity recipe)
+        public async Task SaveIngredients(List<IngredientDto> list, RecipeEntity recipe)
         {
             IEnumerable<UnitEntity> units = _datacontext.Units.ToList();
             var ingredientsToSave = new List<IngredientEntity>();
@@ -119,7 +123,7 @@ namespace meal_menu_api.Managers
             var StepsToSave = new List<StepEntity>();
 
             foreach (var item in list)
-                StepsToSave.Add(StepMapper.ToStepEntity(item,recipe));
+                StepsToSave.Add(StepMapper.ToStepEntity(item, recipe));
 
             try
             {
@@ -156,7 +160,7 @@ namespace meal_menu_api.Managers
         public async Task DeleteImage(int recipeId)
         {
             ImageEntity? existingImage = await _datacontext.Images.FirstOrDefaultAsync(i => i.RecipeId == recipeId);
-            if(existingImage != null)
+            if (existingImage != null)
             {
                 var filePath = Path.Combine(existingImage!.ImageUrl);
                 File.Delete(filePath);
@@ -164,6 +168,73 @@ namespace meal_menu_api.Managers
                 _datacontext.Images.Remove(existingImage);
                 await _datacontext.SaveChangesAsync();
             }
+        }
+
+        public async Task<List<IngredientEntity>> CopyIngredients(List<IngredientEntity> ingredients, RecipeEntity newRecipe)
+        {
+
+            if(ingredients.Count > 0)
+            {
+                IEnumerable<UnitEntity> units = _datacontext.Units.ToList();
+                var ingredientsToSave = new List<IngredientEntity>();
+
+                foreach (var item in ingredients)
+                {
+                    UnitEntity unit = units.FirstOrDefault(x => x.Name == item.Unit.Name)!;
+
+                    if (unit == null)
+                        continue;
+
+                    ingredientsToSave.Add(IngredientMapper.ToIngredientEntity(item, newRecipe, unit));
+                }
+
+                _datacontext.Ingredients.AddRange(ingredientsToSave);
+                await _datacontext.SaveChangesAsync();
+                return ingredientsToSave;
+            }
+
+            return [];
+        }
+
+        public async Task<List<StepEntity>> CopySteps(List<StepEntity> steps, RecipeEntity newRecipe)
+        {
+            var StepsToSave = new List<StepEntity>();
+
+            foreach (var step in steps)
+                StepsToSave.Add(StepMapper.ToStepEntity(step, newRecipe));
+
+            _datacontext.Steps.AddRange(StepsToSave);
+            await _datacontext.SaveChangesAsync();
+            return StepsToSave;
+        }
+
+        public async Task<RecipeEntity> CloneRecipe(RecipeEntity recipeToClone, AppUser newOwner)
+        {
+            if (recipeToClone == null || newOwner == null)
+                return null!;
+
+            var recipe = RecipeMapper.ToRecipeEntity(recipeToClone, newOwner);
+
+            using var transaction = await _datacontext.Database.BeginTransactionAsync();
+            try
+            {
+
+                _datacontext.Recipes.Add(recipe);
+                await _datacontext.SaveChangesAsync();
+
+                recipe.Ingredients = await CopyIngredients(recipeToClone.Ingredients, recipe);
+                recipe.Steps = await CopySteps(recipeToClone.Steps, recipe);
+                recipe.Images = await _imagemanager.CopyImages(recipeToClone.Images, recipe);
+                await transaction.CommitAsync();
+            }
+            catch (Exception error)
+            {
+                await transaction.RollbackAsync();
+                Debug.WriteLine($"Error RecipeManager, Colning recipe in RecipeManager function: {error.Message}");
+                Console.WriteLine($"Error RecipeManager, Colning recipe in RecipeManager function: {error.Message}");
+                throw new Exception("An error occurred while cloning the recipe.", error);
+            }
+            return recipe;
         }
     }
 }

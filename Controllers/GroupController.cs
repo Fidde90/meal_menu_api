@@ -256,6 +256,7 @@ namespace meal_menu_api.Controllers
                     return NotFound("group not found");
 
                 _dataContext.Groups.Remove(group);
+                await _imageManager.DeleteGroupImage(group.Id);
                 await _dataContext.SaveChangesAsync();
 
                 return NoContent();

@@ -1,16 +1,20 @@
 ﻿using meal_menu_api.Database.Context;
+using meal_menu_api.Dtos;
 using meal_menu_api.Dtos.Groups;
 using meal_menu_api.Entities;
 using meal_menu_api.Entities.Account;
 using meal_menu_api.Entities.Groups;
 using meal_menu_api.Entities.Recipes;
 using meal_menu_api.Filters;
+using meal_menu_api.Managers;
 using meal_menu_api.Mappers;
 using meal_menu_api.Models.Forms;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace meal_menu_api.Controllers
 {
@@ -22,10 +26,13 @@ namespace meal_menu_api.Controllers
     {
         private readonly DataContext _dataContext;
         private readonly UserManager<AppUser> _userManager;
-        public GroupRecipeController(DataContext dataContext, UserManager<AppUser> userManager)
+        private readonly RecipeManager _recipeManager;
+
+        public GroupRecipeController(DataContext dataContext, UserManager<AppUser> userManager, RecipeManager recipeManager)
         {
             _dataContext = dataContext;
             _userManager = userManager;
+            _recipeManager = recipeManager;
         }
 
         [HttpPost]
@@ -166,6 +173,30 @@ namespace meal_menu_api.Controllers
                                                     .ToListAsync();
 
             return Ok(result);
+        }
+
+        [HttpPost]
+        [Route("{recipeId}/clone")]
+        public async Task<IActionResult> CloneGroupRecipeToUserRecipe(int recipeId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var originalRecipe = await _dataContext.Recipes
+                                                .Include(r => r.Ingredients)
+                                                    .ThenInclude(r => r.Unit)
+                                                .Include(r => r.Images)
+                                                .Include(r => r.Steps)
+                                                .FirstOrDefaultAsync(r => r.Id == recipeId);
+            if (originalRecipe == null)
+                return NotFound("recipe not found");
+
+            var clonedRecipe = await _recipeManager.CloneRecipe(originalRecipe, user!);
+            var recipeDto = RecipeMapper.ToRecipeDtoGet(clonedRecipe);
+
+            if(clonedRecipe != null)
+                return Ok(recipeDto);
+
+            return StatusCode(500);
         }
     }
 }

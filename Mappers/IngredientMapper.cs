@@ -53,5 +53,21 @@ namespace meal_menu_api.Mappers
 
             return newIngredient;
         }
+
+        public static IngredientEntity ToIngredientEntity(IngredientEntity ingredient, RecipeEntity recipe, UnitEntity unit)
+        {
+            IngredientEntity newIngredient = new()
+            {
+                Description = ingredient.Description,
+                Name = ingredient.Name,
+                Amount = ingredient.Amount,
+                UnitId = unit.Id,
+                Unit = unit,
+                RecipeId = recipe.Id,
+                Recipe = recipe,
+            };
+
+            return newIngredient;
+        }
     }
 }
