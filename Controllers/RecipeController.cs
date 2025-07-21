@@ -1,6 +1,8 @@
 ﻿using meal_menu_api.Database.Context;
 using meal_menu_api.Dtos;
+using meal_menu_api.Dtos.Groups;
 using meal_menu_api.Entities.Account;
+using meal_menu_api.Entities.Groups;
 using meal_menu_api.Entities.Recipes;
 using meal_menu_api.Managers;
 using meal_menu_api.Mappers;
@@ -96,7 +98,7 @@ namespace meal_menu_api.Controllers
 
                 foreach (RecipeEntity recipe in recipeEntities)
                 {
-                    RecipeDtoGet newRecipeDto = RecipeMapper.ToRecipeDtoGet(recipe);
+                    RecipeDtoGet newRecipeDto = RecipeMapper.ToRecipeDtoGet(recipe, user.Id);
                     recipeDtos.Add(newRecipeDto);
                 }
 
@@ -110,21 +112,56 @@ namespace meal_menu_api.Controllers
         [Route("{id}")]
         public async Task<IActionResult> GetRecipe(string id)
         {
-            if (string.IsNullOrEmpty(id))
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+                return Unauthorized();
+            else if (string.IsNullOrEmpty(id))
                 return BadRequest();
 
             RecipeEntity? recipe = await _dataContext.Recipes.Include(recipe => recipe.Ingredients)
-                .ThenInclude(ingredient => ingredient.Unit)
-                .Include(recipe => recipe.Steps)
-                .Include(recipe => recipe.Images)
-                .FirstOrDefaultAsync(recipe => recipe.Id.ToString() == id);
+                    .ThenInclude(ingredient => ingredient.Unit)
+                    .Include(recipe => recipe.Steps)
+                    .Include(recipe => recipe.Images)
+                    .FirstOrDefaultAsync(recipe => recipe.Id.ToString() == id);
 
             if (recipe == null)
                 return NotFound();
+          
+            RecipeDtoGet newRecipeDto = RecipeMapper.ToRecipeDtoGet(recipe, user.Id);
 
-            RecipeDtoGet newRecipeDto = RecipeMapper.ToRecipeDtoGet(recipe);
+            ////check if the current user is the user who created the recipe
+            //var userId = _userManager.GetUserId(User);
+            //if (recipe.UserId == userId)
+            //    newRecipeDto.IsOwner = true;
 
             return Ok(newRecipeDto);
+        }
+
+        [HttpGet]
+        [Route("get-recent/{n}")]
+        public async Task<IActionResult> GetRecentRecipes(int n)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return Unauthorized();
+
+            List<RecipeEntity> filterdRecipes = await _dataContext.Recipes
+                                                                        .Where(r => r.UserId == user.Id)
+                                                                        .Include(r => r.Ingredients)                                                                          
+                                                                            .ThenInclude(i => i.Unit)
+                                                                        .Include(r => r.Images)                                                    
+                                                                        .Include(r => r.Steps)                                                                                                                                        
+                                                                        .OrderByDescending(r => r.CreatedAt)
+                                                                        .Take(n)
+                                                                        .ToListAsync();
+
+            if (filterdRecipes.Count < 1)
+                return NotFound();
+
+            List<RecipeDtoGet> recentRecipesDtos = RecipeMapper.ToRecipeDtos(filterdRecipes, user.Id);
+
+            return Ok(recentRecipesDtos);
         }
 
         [HttpDelete("{id}")]

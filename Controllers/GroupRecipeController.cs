@@ -1,5 +1,4 @@
 ﻿using meal_menu_api.Database.Context;
-using meal_menu_api.Dtos;
 using meal_menu_api.Dtos.Groups;
 using meal_menu_api.Entities;
 using meal_menu_api.Entities.Account;
@@ -12,7 +11,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace meal_menu_api.Controllers
 {
@@ -107,7 +105,9 @@ namespace meal_menu_api.Controllers
             if (groupRecipes.Count < 1)
                 return NotFound();
 
-            List<GroupRecipeDto> groupRecipeDtos = RecipeMapper.ToGroupRecipeDtos(groupRecipes);
+            var user = await _userManager.GetUserAsync(User);
+            string userId = user != null ? user.Id : "";
+            List<GroupRecipeDto> groupRecipeDtos = RecipeMapper.ToGroupRecipeDtos(groupRecipes, userId);
 
             if (groupRecipeDtos.Count > 0)
                 return Ok(groupRecipeDtos);
@@ -136,7 +136,9 @@ namespace meal_menu_api.Controllers
             if (filterdGroupRecipes.Count < 1)
                 return NotFound();
 
-            List<GroupRecipeDto> recentRecipesDtos = RecipeMapper.ToGroupRecipeDtos(filterdGroupRecipes);
+            var user = await _userManager.GetUserAsync(User);
+            string userId = user != null ? user.Id : "";
+            List<GroupRecipeDto> recentRecipesDtos = RecipeMapper.ToGroupRecipeDtos(filterdGroupRecipes, userId);
 
             return Ok(recentRecipesDtos);
         }

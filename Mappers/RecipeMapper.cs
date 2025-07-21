@@ -25,7 +25,7 @@ namespace meal_menu_api.Mappers
             return newRecipe;
         }
 
-        public static RecipeDtoGet ToRecipeDtoGet(RecipeEntity recipe)
+        public static RecipeDtoGet ToRecipeDtoGet(RecipeEntity recipe, string userId = "")
         {
             if (recipe == null)
                 return null!;
@@ -43,10 +43,17 @@ namespace meal_menu_api.Mappers
                 Images = ImageMapper.ImagesToDtos(recipe.Images)
             };
 
+            if (!string.IsNullOrEmpty(userId))
+            {
+                //check if the current user is the user who created the recipe
+                if (recipe.UserId == userId)
+                    newRecipeDto.IsOwner = true;
+            }
+
             return newRecipeDto;
         }
 
-        public static List<RecipeDtoGet> ToRecipeDtos(List<RecipeEntity> recipes)
+        public static List<RecipeDtoGet> ToRecipeDtos(List<RecipeEntity> recipes, string userId = "")
         {
             if (recipes.Count < 1)
                 return [];
@@ -55,7 +62,7 @@ namespace meal_menu_api.Mappers
 
             foreach (RecipeEntity recipe in recipes)
             {
-                dtos.Add(ToRecipeDtoGet(recipe));
+                dtos.Add(ToRecipeDtoGet(recipe, userId));
             }
 
             return dtos;
@@ -79,7 +86,7 @@ namespace meal_menu_api.Mappers
             return newGroupRecipeEntiy;
         }
 
-        public static GroupRecipeDto ToGroupRecipeDto(GroupRecipeEntity groupRecipeEntity)
+        public static GroupRecipeDto ToGroupRecipeDto(GroupRecipeEntity groupRecipeEntity, string userId = "")
         {
             if (groupRecipeEntity == null)
                 return null!;
@@ -88,7 +95,7 @@ namespace meal_menu_api.Mappers
             {
                 Id = groupRecipeEntity.Id,
                 SharedByName = groupRecipeEntity.SharedByUser.FirstName + " " + groupRecipeEntity.SharedByUser.LastName,
-                RecipeDto = RecipeMapper.ToRecipeDtoGet(groupRecipeEntity.Recipe),
+                RecipeDto = RecipeMapper.ToRecipeDtoGet(groupRecipeEntity.Recipe, userId),
                 CreatedAt = groupRecipeEntity.CreatedAt,
                 UpdatedAt = groupRecipeEntity.UpdatedAt,
             };
@@ -96,7 +103,7 @@ namespace meal_menu_api.Mappers
             return newGroupRecipeDto;
         }
 
-        public static List<GroupRecipeDto> ToGroupRecipeDtos(List<GroupRecipeEntity> entityList)
+        public static List<GroupRecipeDto> ToGroupRecipeDtos(List<GroupRecipeEntity> entityList, string userId = "")
         {
             if (entityList.Count < 1)
                 return [];
@@ -105,7 +112,7 @@ namespace meal_menu_api.Mappers
 
             foreach (var entity in entityList)
             {
-                var newDto = RecipeMapper.ToGroupRecipeDto(entity);
+                var newDto = RecipeMapper.ToGroupRecipeDto(entity, userId);
                 returnList.Add(newDto);
             }
 
