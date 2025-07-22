@@ -45,3 +45,10 @@ node_modules/
 desktop.ini
 /appsettings.json
 /appsettings.json
+
+#DB files
+*.mdf
+*.ldf
+
+# Pictures
+/Images

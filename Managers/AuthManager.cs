@@ -1,4 +1,4 @@
-﻿using meal_menu_api.Entities;
+﻿using meal_menu_api.Entities.Account;
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
@@ -10,7 +10,6 @@ namespace meal_menu_api.Managers
     public class AuthManager
     {
         private readonly IConfiguration _configuration;
-        private object user;
 
         public AuthManager(IConfiguration configuration)
         {
@@ -31,16 +30,16 @@ namespace meal_menu_api.Managers
                     new Claim(ClaimTypes.Name, user.UserName!)
                 };
 
-                var tokenDescripter = new SecurityTokenDescriptor
+                var tokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = new ClaimsIdentity(claims),
-                    Expires = DateTime.UtcNow.AddDays(30),
+                    Expires = DateTime.UtcNow.AddDays(60),
                     Issuer = _configuration["Jwt:Issuer"],
                     Audience = _configuration["Jwt:Audience"],
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
 
-                var token = tokenHandler.CreateToken(tokenDescripter);
+                var token = tokenHandler.CreateToken(tokenDescriptor);
                 var tokenString = tokenHandler.WriteToken(token);
 
                 return tokenString;

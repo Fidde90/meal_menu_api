@@ -1,0 +1,269 @@
+﻿using meal_menu_api.Database.Context;
+using meal_menu_api.Dtos;
+using meal_menu_api.Dtos.Groups;
+using meal_menu_api.Entities.Account;
+using meal_menu_api.Entities.Groups;
+using meal_menu_api.Entities.Recipes;
+using meal_menu_api.Managers;
+using meal_menu_api.Mappers;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Diagnostics;
+
+namespace meal_menu_api.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize]
+    public class RecipeController : ControllerBase
+    {
+        private readonly DataContext _dataContext;
+        private readonly RecipeManager _recipeManager;
+        private readonly UserManager<AppUser> _userManager;
+
+        public RecipeController(DataContext dataContext, RecipeManager recipeManager, UserManager<AppUser> userManager)
+        {
+            _dataContext = dataContext;
+            _recipeManager = recipeManager;
+            _userManager = userManager;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateRecipe(RecipeDtoCreate recipeDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            AppUser? user = await _userManager.FindByEmailAsync(User.Identity!.Name!);
+
+            if (user == null)
+                return Unauthorized();
+
+            using var transaction = await _dataContext.Database.BeginTransactionAsync();
+
+            try
+            {
+                var newRecipe = RecipeMapper.ToRecipeEntity(recipeDto, user);
+
+                _dataContext.Recipes.Add(newRecipe);
+                await _dataContext.SaveChangesAsync();
+
+                List<IngredientDto> ingredients = JsonConvert.DeserializeObject<List<IngredientDto>>(recipeDto.Ingredients!)!;
+                List<StepDto> steps = JsonConvert.DeserializeObject<List<StepDto>>(recipeDto.Steps!)!;
+
+                if (ingredients != null && ingredients.Any())
+                    await _recipeManager.SaveIngredients(ingredients!, newRecipe);
+
+                if (steps != null && steps.Any())
+                    await _recipeManager.SaveSteps(steps!, newRecipe);
+
+                if (recipeDto.Image != null)
+                    await _recipeManager.SaveImages(recipeDto.Image!, newRecipe);
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception error)
+            {
+                await transaction.RollbackAsync();
+                Debug.WriteLine($"Error RecipeController, Saving Ingredients in SaveIngredients function: {error.Message}");
+                Console.WriteLine($"Error RecipeController, Saving Ingredients in SaveIngredients function: {error.Message}");
+                throw new Exception("An error occurred while saving the recipe.", error);
+            }
+
+            return Ok();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllRecipes()
+        {
+            AppUser? user = await _userManager.GetUserAsync(User);
+
+            if (user != null)
+            {
+                List<RecipeEntity> recipeEntities = _dataContext.Recipes.Where(r => r.UserId == user.Id)
+                    .Include(r => r.Ingredients).ThenInclude(i => i.Unit)
+                    .Include(r => r.Steps)
+                    .Include(r => r.Images)
+                    .OrderByDescending(r => r.CreatedAt)
+                    .AsNoTracking()
+                    .ToList();
+
+                if (recipeEntities.Count < 1)
+                    return NotFound();
+
+                List<RecipeDtoGet> recipeDtos = [];
+
+                foreach (RecipeEntity recipe in recipeEntities)
+                {
+                    RecipeDtoGet newRecipeDto = RecipeMapper.ToRecipeDtoGet(recipe, user.Id);
+                    recipeDtos.Add(newRecipeDto);
+                }
+
+                return Ok(recipeDtos);
+            }
+
+            return Unauthorized();
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<IActionResult> GetRecipe(string id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+                return Unauthorized();
+            else if (string.IsNullOrEmpty(id))
+                return BadRequest();
+
+            RecipeEntity? recipe = await _dataContext.Recipes.Include(recipe => recipe.Ingredients)
+                    .ThenInclude(ingredient => ingredient.Unit)
+                    .Include(recipe => recipe.Steps)
+                    .Include(recipe => recipe.Images)
+                    .FirstOrDefaultAsync(recipe => recipe.Id.ToString() == id);
+
+            if (recipe == null)
+                return NotFound();
+          
+            RecipeDtoGet newRecipeDto = RecipeMapper.ToRecipeDtoGet(recipe, user.Id);
+
+            ////check if the current user is the user who created the recipe
+            //var userId = _userManager.GetUserId(User);
+            //if (recipe.UserId == userId)
+            //    newRecipeDto.IsOwner = true;
+
+            return Ok(newRecipeDto);
+        }
+
+        [HttpGet]
+        [Route("get-recent/{n}")]
+        public async Task<IActionResult> GetRecentRecipes(int n)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return Unauthorized();
+
+            List<RecipeEntity> filterdRecipes = await _dataContext.Recipes
+                                                                        .Where(r => r.UserId == user.Id)
+                                                                        .Include(r => r.Ingredients)                                                                          
+                                                                            .ThenInclude(i => i.Unit)
+                                                                        .Include(r => r.Images)                                                    
+                                                                        .Include(r => r.Steps)                                                                                                                                        
+                                                                        .OrderByDescending(r => r.CreatedAt)
+                                                                        .Take(n)
+                                                                        .ToListAsync();
+
+            if (filterdRecipes.Count < 1)
+                return NotFound();
+
+            List<RecipeDtoGet> recentRecipesDtos = RecipeMapper.ToRecipeDtos(filterdRecipes, user.Id);
+
+            return Ok(recentRecipesDtos);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRecipe(string id)
+        {
+            RecipeEntity? recipeToDelete = await _dataContext.Recipes.FirstOrDefaultAsync(r => r.Id.ToString() == id) ?? null;
+
+            if (recipeToDelete != null)
+            {
+                await _recipeManager.DeleteImage(recipeToDelete.Id);
+
+                _dataContext.Recipes.Remove(recipeToDelete);
+                await _dataContext.SaveChangesAsync();
+                return NoContent();
+            }
+
+            return NotFound();
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateRecipe(string id, RecipeDtoCreate recipeDto)
+        {
+
+            //hämtar användare och receptet
+            AppUser? user = await _userManager.FindByEmailAsync(User!.Identity!.Name!);
+            RecipeEntity? recipeEntity = await _dataContext.Recipes.FirstOrDefaultAsync(r => r.Id.ToString() == id);
+
+            if (user == null || recipeEntity == null)
+                return NotFound();
+
+            //säkerhets kontroll 
+            if (recipeEntity.UserId != user.Id)
+                return Forbid();
+
+            //deserializerar listorna
+            List<IngredientDto> ingredientDtos = JsonConvert.DeserializeObject<List<IngredientDto>>(recipeDto.Ingredients!)!;
+            List<StepDto> stepDtos = JsonConvert.DeserializeObject<List<StepDto>>(recipeDto.Steps!)!;
+
+            //uppdaterar basic info
+            recipeEntity!.Name = recipeDto.RecipeName;
+            recipeEntity.Description = recipeDto.RecipeDescription;
+            recipeEntity.Ppl = recipeDto.Ppl;
+            recipeEntity.UpdatedAt = DateTime.Now;
+
+            if (stepDtos.Count < 1)
+                await _dataContext.Steps.Where(s => s.RecipeId == recipeEntity.Id).ExecuteDeleteAsync();
+
+            if (stepDtos.Count > 0)
+            {
+                List<StepDto> newSteps = [];
+                List<StepDto> oldSteps = [];
+
+                foreach (StepDto stepDto in stepDtos)
+                {
+                    if (stepDto.Id == -1)
+                        newSteps.Add(stepDto);
+                    else
+                        oldSteps.Add(stepDto);
+                }
+
+                if (oldSteps.Count != 0)
+                    await _recipeManager.UpdateStepsAsync(oldSteps, recipeEntity);
+
+                if (newSteps.Count != 0)
+                    await _recipeManager.SaveSteps(newSteps, recipeEntity);
+            }
+
+            if (ingredientDtos.Count < 1)
+                await _dataContext.Ingredients.Where(i => i.RecipeId == recipeEntity.Id).ExecuteDeleteAsync();
+
+            if (ingredientDtos.Count > 0)
+            {
+                List<IngredientDto> newIngredients = [];
+                List<IngredientDto> oldIngredients = [];
+
+                foreach (IngredientDto ingredientDto in ingredientDtos)
+                {
+                    if (ingredientDto.Id == -1)
+                        newIngredients.Add(ingredientDto);
+                    else
+                        oldIngredients.Add(ingredientDto);
+                }
+
+                if (oldIngredients.Count != 0)
+                    await _recipeManager.UpdateIngredientsAsync(oldIngredients, recipeEntity);
+
+                if (newIngredients.Count != 0)
+                    await _recipeManager.SaveIngredients(newIngredients, recipeEntity);
+            }
+
+            if (recipeDto.DeleteImage && recipeDto.Image == null) //RADERA
+                await _recipeManager.DeleteImage(recipeEntity.Id);
+
+            if (recipeDto.Image != null && !recipeDto.DeleteImage) //BYT UT //BEHÅLL
+            {
+                await _recipeManager.DeleteImage(recipeEntity.Id);
+                await _recipeManager.SaveImages(recipeDto.Image, recipeEntity);
+            }
+
+            await _dataContext.SaveChangesAsync();
+
+            return Ok();
+        }
+    }
+}

@@ -1,5 +1,5 @@
-﻿using meal_menu_api.Dtos;
-using meal_menu_api.Entities;
+﻿using meal_menu_api.Dtos.Account;
+using meal_menu_api.Entities.Account;
 using meal_menu_api.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -9,6 +9,8 @@ namespace meal_menu_api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [UseApiKey]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
@@ -18,22 +20,19 @@ namespace meal_menu_api.Controllers
             _userManager = userManager;
         }
 
-        [Route("get-user")]
-        [UseApiKey]
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<IActionResult> GetUser()
+        [HttpGet]
+        [Route("me")]
+        public async Task<IActionResult> GeCurrenttUser()
         {
             AppUser? user = await _userManager.GetUserAsync(User);
 
             if (user != null)
-                return Ok(new {user});
+                return Ok(new { user });
 
             return NotFound();
         }
 
-        [Route("update")]
-        [UseApiKey]
-        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpPut]
         public async Task<IActionResult> UpdateUser(UpdateUserDto updateUserDto)
         {
             if (!ModelState.IsValid)
@@ -50,7 +49,7 @@ namespace meal_menu_api.Controllers
             existingUserInfo.PhoneNumber = updateUserDto.PhoneNumber!;
             existingUserInfo.EmailConfirmed = true;
             existingUserInfo.TwoFactorEnabled = updateUserDto.TowFactorEnabeld;
-            existingUserInfo.UpdatedAt = DateTime.UtcNow;
+            existingUserInfo.UpdatedAt = DateTime.Now;
 
             var updated = await _userManager.UpdateAsync(existingUserInfo);
             if (updated.Succeeded)

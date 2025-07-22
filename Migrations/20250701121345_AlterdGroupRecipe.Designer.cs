@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using meal_menu_api.Database.Context;
 
@@ -11,9 +12,11 @@ using meal_menu_api.Database.Context;
 namespace meal_menu_api.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250701121345_AlterdGroupRecipe")]
+    partial class AlterdGroupRecipe
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -415,9 +418,12 @@ namespace meal_menu_api.Migrations
                     b.Property<int>("RecipeId")
                         .HasColumnType("int");
 
+                    b.Property<string>("SharedById")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("SharedByUserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -428,7 +434,7 @@ namespace meal_menu_api.Migrations
 
                     b.HasIndex("RecipeId");
 
-                    b.HasIndex("SharedByUserId");
+                    b.HasIndex("SharedById");
 
                     b.ToTable("GroupRecipes");
                 });
@@ -799,22 +805,20 @@ namespace meal_menu_api.Migrations
                         .IsRequired();
 
                     b.HasOne("meal_menu_api.Entities.Recipes.RecipeEntity", "Recipe")
-                        .WithMany("SharedWithGroups")
+                        .WithMany()
                         .HasForeignKey("RecipeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("meal_menu_api.Entities.Account.AppUser", "SharedByUser")
+                    b.HasOne("meal_menu_api.Entities.Account.AppUser", "SharedBy")
                         .WithMany()
-                        .HasForeignKey("SharedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("SharedById");
 
                     b.Navigation("Group");
 
                     b.Navigation("Recipe");
 
-                    b.Navigation("SharedByUser");
+                    b.Navigation("SharedBy");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.Recipes.ImageEntity", b =>
@@ -931,8 +935,6 @@ namespace meal_menu_api.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("Ingredients");
-
-                    b.Navigation("SharedWithGroups");
 
                     b.Navigation("Steps");
                 });

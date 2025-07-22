@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using meal_menu_api.Database.Context;
 
@@ -11,9 +12,11 @@ using meal_menu_api.Database.Context;
 namespace meal_menu_api.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250623093524_AddNewDatabase")]
+    partial class AddNewDatabase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -409,7 +412,18 @@ namespace meal_menu_api.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("GroupId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Ppl")
                         .HasColumnType("int");
 
                     b.Property<int>("RecipeId")
@@ -425,8 +439,6 @@ namespace meal_menu_api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("GroupId");
-
-                    b.HasIndex("RecipeId");
 
                     b.HasIndex("SharedByUserId");
 
@@ -444,6 +456,9 @@ namespace meal_menu_api.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("GroupRecipeEntityId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -455,6 +470,8 @@ namespace meal_menu_api.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GroupRecipeEntityId");
 
                     b.HasIndex("RecipeId");
 
@@ -478,6 +495,9 @@ namespace meal_menu_api.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("GroupRecipeEntityId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -492,6 +512,8 @@ namespace meal_menu_api.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GroupRecipeEntityId");
 
                     b.HasIndex("RecipeId");
 
@@ -554,6 +576,9 @@ namespace meal_menu_api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("GroupRecipeEntityId")
+                        .HasColumnType("int");
+
                     b.Property<int>("RecipeId")
                         .HasColumnType("int");
 
@@ -561,6 +586,8 @@ namespace meal_menu_api.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GroupRecipeEntityId");
 
                     b.HasIndex("RecipeId");
 
@@ -798,27 +825,23 @@ namespace meal_menu_api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("meal_menu_api.Entities.Recipes.RecipeEntity", "Recipe")
-                        .WithMany("SharedWithGroups")
-                        .HasForeignKey("RecipeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("meal_menu_api.Entities.Account.AppUser", "SharedByUser")
+                    b.HasOne("meal_menu_api.Entities.Account.AppUser", "SharedBy")
                         .WithMany()
                         .HasForeignKey("SharedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Group");
 
-                    b.Navigation("Recipe");
-
-                    b.Navigation("SharedByUser");
+                    b.Navigation("SharedBy");
                 });
 
             modelBuilder.Entity("meal_menu_api.Entities.Recipes.ImageEntity", b =>
                 {
+                    b.HasOne("meal_menu_api.Entities.Groups.GroupRecipeEntity", null)
+                        .WithMany("Images")
+                        .HasForeignKey("GroupRecipeEntityId");
+
                     b.HasOne("meal_menu_api.Entities.Recipes.RecipeEntity", "Recipe")
                         .WithMany("Images")
                         .HasForeignKey("RecipeId")
@@ -830,6 +853,10 @@ namespace meal_menu_api.Migrations
 
             modelBuilder.Entity("meal_menu_api.Entities.Recipes.IngredientEntity", b =>
                 {
+                    b.HasOne("meal_menu_api.Entities.Groups.GroupRecipeEntity", null)
+                        .WithMany("Ingredients")
+                        .HasForeignKey("GroupRecipeEntityId");
+
                     b.HasOne("meal_menu_api.Entities.Recipes.RecipeEntity", "Recipe")
                         .WithMany("Ingredients")
                         .HasForeignKey("RecipeId")
@@ -860,6 +887,10 @@ namespace meal_menu_api.Migrations
 
             modelBuilder.Entity("meal_menu_api.Entities.Recipes.StepEntity", b =>
                 {
+                    b.HasOne("meal_menu_api.Entities.Groups.GroupRecipeEntity", null)
+                        .WithMany("Steps")
+                        .HasForeignKey("GroupRecipeEntityId");
+
                     b.HasOne("meal_menu_api.Entities.Recipes.RecipeEntity", "Recipe")
                         .WithMany("Steps")
                         .HasForeignKey("RecipeId")
@@ -926,13 +957,20 @@ namespace meal_menu_api.Migrations
                     b.Navigation("Members");
                 });
 
-            modelBuilder.Entity("meal_menu_api.Entities.Recipes.RecipeEntity", b =>
+            modelBuilder.Entity("meal_menu_api.Entities.Groups.GroupRecipeEntity", b =>
                 {
                     b.Navigation("Images");
 
                     b.Navigation("Ingredients");
 
-                    b.Navigation("SharedWithGroups");
+                    b.Navigation("Steps");
+                });
+
+            modelBuilder.Entity("meal_menu_api.Entities.Recipes.RecipeEntity", b =>
+                {
+                    b.Navigation("Images");
+
+                    b.Navigation("Ingredients");
 
                     b.Navigation("Steps");
                 });
