@@ -11,8 +11,12 @@ using meal_menu_api.Entities.Groups;
 
 namespace meal_menu_api.Database.Context
 {
-    public class DataContext(DbContextOptions<DataContext> options) : IdentityDbContext<AppUser>(options)
+    public class DataContext : IdentityDbContext<AppUser>
     {
+        public DataContext(DbContextOptions<DataContext> options) : base(options)
+        {
+            
+        }
 
         public DbSet<RecipeEntity> Recipes { get; set; }
 
